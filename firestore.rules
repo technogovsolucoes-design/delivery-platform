@@ -1,0 +1,77 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function claims() {
+      return request.auth.token;
+    }
+
+    function isPlatformAdmin() {
+      return isSignedIn() && claims().role == 'platform_admin';
+    }
+
+    function isTenantStaff(tenantId) {
+      return isSignedIn()
+        && (claims().role == 'merchant_owner' || claims().role == 'merchant_staff')
+        && claims().tenantId == tenantId;
+    }
+
+    function isOwnerOf(tenantId) {
+      return isSignedIn() && claims().role == 'merchant_owner' && claims().tenantId == tenantId;
+    }
+
+    // --- tenants (stores) ---
+    match /tenants/{tenantId} {
+      // Public storefront: anyone can see active stores; staff/admin can always see their own.
+      allow get: if resource.data.status == 'active' || isTenantStaff(tenantId) || isPlatformAdmin();
+      allow list: if true;
+      allow create: if isPlatformAdmin();
+      allow update: if isOwnerOf(tenantId) || isPlatformAdmin();
+      allow delete: if isPlatformAdmin();
+
+      // --- products ---
+      match /products/{productId} {
+        allow get: if resource.data.active == true || isTenantStaff(tenantId) || isPlatformAdmin();
+        allow list: if true;
+        allow write: if isTenantStaff(tenantId) || isPlatformAdmin();
+      }
+
+      // --- orders ---
+      match /orders/{orderId} {
+        allow get: if isSignedIn()
+          && (resource.data.customerId == request.auth.uid || isTenantStaff(tenantId) || isPlatformAdmin());
+        allow list: if isSignedIn() && (isTenantStaff(tenantId) || isPlatformAdmin());
+        allow create: if isSignedIn() && request.resource.data.customerId == request.auth.uid;
+        // Staff may only change order status, never payment/total fields (those are
+        // owned by Cloud Functions via the Admin SDK, which bypasses these rules).
+        allow update: if isTenantStaff(tenantId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']);
+        allow delete: if false;
+      }
+
+      // --- staff roster ---
+      match /staff/{userId} {
+        allow read: if isTenantStaff(tenantId) || isPlatformAdmin();
+        allow write: if isPlatformAdmin();
+      }
+    }
+
+    // --- customer profiles ---
+    match /users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isPlatformAdmin());
+      allow create, update: if isSignedIn() && request.auth.uid == userId;
+      allow delete: if isPlatformAdmin();
+    }
+
+    // --- platform admins registry ---
+    match /platformAdmins/{userId} {
+      allow read: if isPlatformAdmin();
+      allow write: if false; // managed via Admin SDK / console only
+    }
+  }
+}

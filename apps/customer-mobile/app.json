@@ -1,0 +1,18 @@
+{
+  "expo": {
+    "name": "Delivery Bebidas",
+    "slug": "delivery-customer-mobile",
+    "scheme": "delivery-customer",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}

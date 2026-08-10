@@ -1,0 +1,31 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "functions"
+
+allowBuilds:
+  '@firebase/util': set this to true or false
+  protobufjs: set this to true or false
+  sharp: set this to true or false
+  unrs-resolver: set this to true or false
+
+# Postinstall scripts pnpm blocks by default (supply-chain hardening). These four are
+# well-known packages that need their native/build step to work correctly:
+#   @firebase/util  — Firebase SDK internal, dependency of firebase/firebase-admin
+#   protobufjs      — used by firebase-admin/grpc for protobuf (de)serialization
+#   sharp           — native image processing, used by Next.js image optimization
+#   unrs-resolver   — native (Rust) module resolver used by ESLint tooling
+onlyBuiltDependencies:
+  - "@firebase/util"
+  - protobufjs
+  - sharp
+  - unrs-resolver
+
+# Pin a single copy of react/react-dom types across the workspace — apps/merchant-dashboard
+# was otherwise resolving a slightly newer @types/react than its transitive deps, and TS
+# treated the two copies' JSX.Element/ReactNode as structurally incompatible types.
+overrides:
+  react: 19.0.0
+  react-dom: 19.0.0
+  "@types/react": 19.0.4
+  "@types/react-dom": 19.0.2

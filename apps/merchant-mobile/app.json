@@ -1,0 +1,18 @@
+{
+  "expo": {
+    "name": "Delivery Lojista",
+    "slug": "delivery-merchant-mobile",
+    "scheme": "delivery-merchant",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}

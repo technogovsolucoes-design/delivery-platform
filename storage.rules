@@ -1,0 +1,24 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isTenantStaff(tenantId) {
+      return isSignedIn()
+        && (request.auth.token.role == 'merchant_owner' || request.auth.token.role == 'merchant_staff')
+        && request.auth.token.tenantId == tenantId;
+    }
+
+    // Product images: publicly readable, only the tenant's own staff can upload.
+    match /tenants/{tenantId}/products/{allPaths=**} {
+      allow read: if true;
+      allow write: if isTenantStaff(tenantId)
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+  }
+}

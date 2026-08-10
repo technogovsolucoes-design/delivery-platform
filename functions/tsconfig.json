@@ -1,0 +1,12 @@
+{
+  "extends": "@delivery/config/tsconfig.base.json",
+  "compilerOptions": {
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "outDir": "lib",
+    "rootDir": "src",
+    "types": ["node"]
+  },
+  "include": ["src"],
+  "compileOnSave": true
+}

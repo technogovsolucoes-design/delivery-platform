@@ -1,0 +1,36 @@
+{
+  "name": "@delivery/customer-mobile",
+  "private": true,
+  "version": "0.1.0",
+  "main": "expo-router/entry",
+  "scripts": {
+    "dev": "expo start",
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@delivery/firebase-config": "workspace:*",
+    "@delivery/shared-types": "workspace:*",
+    "expo": "~52.0.11",
+    "expo-router": "~4.0.9",
+    "expo-status-bar": "~2.0.0",
+    "firebase": "^11.1.0",
+    "react": "18.3.1",
+    "react-native": "0.76.3",
+    "react-native-safe-area-context": "4.12.0",
+    "react-native-screens": "~4.1.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@delivery/config": "workspace:*",
+    "@types/react": "~18.3.12",
+    "babel-preset-expo": "~12.0.1",
+    "eslint": "^9.18.0",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.19.1"
+  }
+}

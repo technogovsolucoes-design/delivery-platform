@@ -1,0 +1,31 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build outputs
+.next/
+dist/
+/functions/lib/
+build/
+.turbo/
+.expo/
+.expo-shared/
+*.tsbuildinfo
+
+# env
+.env
+.env.local
+.env.*.local
+
+# firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+*.pem
+
+# misc
+.DS_Store
+*.log
+.vercel/
+.claude/
