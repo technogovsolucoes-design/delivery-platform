@@ -24,11 +24,15 @@ onlyBuiltDependencies:
   - sharp
   - unrs-resolver
 
-# Pin a single copy of react/react-dom types across the workspace — apps/merchant-dashboard
-# was otherwise resolving a slightly newer @types/react than its transitive deps, and TS
-# treated the two copies' JSX.Element/ReactNode as structurally incompatible types.
+# react/react-dom (the runtime packages) are scoped to merchant-dashboard only, so the Expo
+# apps keep resolving their own React 18.3.1 (required by React Native 0.76's peer range).
+# @types/react and @types/react-dom are pinned workspace-wide instead of scoped: Next.js's
+# own generated .next/types kept resolving a second, slightly newer copy of @types/react than
+# the one merchant-dashboard requested, and TS treated the two copies' JSX.Element/ReactNode
+# as structurally incompatible. Being type-only, this has no runtime effect on the Expo apps
+# even though it also touches their type layer.
 overrides:
-  react: 19.0.0
-  react-dom: 19.0.0
+  "@delivery/merchant-dashboard>react": 19.0.0
+  "@delivery/merchant-dashboard>react-dom": 19.0.0
   "@types/react": 19.0.4
   "@types/react-dom": 19.0.2

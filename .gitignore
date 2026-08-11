@@ -23,6 +23,8 @@ firebase-debug.log
 firestore-debug.log
 ui-debug.log
 *.pem
+*firebase-adminsdk*.json
+*serviceAccountKey*.json
 
 # misc
 .DS_Store
