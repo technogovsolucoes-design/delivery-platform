@@ -7,22 +7,23 @@
     "node": "20"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --noEmit && esbuild src/index.ts --bundle --platform=node --target=node20 --format=cjs --outfile=lib/index.js --external:firebase-admin --external:firebase-functions --external:mercadopago",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "serve": "npm run build && firebase emulators:start --only functions",
     "deploy": "firebase deploy --only functions"
   },
   "dependencies": {
-    "@delivery/firebase-config": "workspace:*",
-    "@delivery/shared-types": "workspace:*",
     "firebase-admin": "^13.0.2",
     "firebase-functions": "^6.2.0",
     "mercadopago": "^2.2.0"
   },
   "devDependencies": {
     "@delivery/config": "workspace:*",
+    "@delivery/firebase-config": "workspace:*",
+    "@delivery/shared-types": "workspace:*",
     "@types/node": "^22.10.5",
+    "esbuild": "^0.24.2",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.19.1",
     "eslint": "^9.18.0"
