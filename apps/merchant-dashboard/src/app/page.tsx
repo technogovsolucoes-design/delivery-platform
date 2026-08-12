@@ -5,13 +5,17 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 
 export default function HomePage() {
-  const { user, loading } = useAuth();
+  const { user, claims, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (loading) return;
-    router.replace(user ? "/pedidos" : "/login");
-  }, [loading, user, router]);
+    if (!user) {
+      router.replace("/login");
+      return;
+    }
+    router.replace(claims?.role === "platform_admin" ? "/admin" : "/pedidos");
+  }, [loading, user, claims, router]);
 
   return <div className="center-screen">Carregando...</div>;
 }

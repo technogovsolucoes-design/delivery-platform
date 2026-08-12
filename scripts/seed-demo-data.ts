@@ -40,6 +40,12 @@ async function main() {
       lat: -23.5505,
       lng: -46.6333,
     },
+    logoUrl: null,
+    owner: {
+      name: "Dono da Adega Boa Vista",
+      email: merchantEmail,
+      phone: "",
+    },
     commissionRate: 0.15,
     mpSellerId: null,
     openingHours: {

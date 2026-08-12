@@ -29,7 +29,9 @@ service cloud.firestore {
     match /tenants/{tenantId} {
       // Public storefront: anyone can see active stores; staff/admin can always see their own.
       allow get: if resource.data.status == 'active' || isTenantStaff(tenantId) || isPlatformAdmin();
-      allow list: if true;
+      // "list" can reference resource.data too — Firestore filters the result set per-doc,
+      // so this doubles as public storefront listing (active only) and full admin listing.
+      allow list: if resource.data.status == 'active' || isPlatformAdmin();
       allow create: if isPlatformAdmin();
       allow update: if isOwnerOf(tenantId) || isPlatformAdmin();
       allow delete: if isPlatformAdmin();
@@ -45,7 +47,10 @@ service cloud.firestore {
       match /orders/{orderId} {
         allow get: if isSignedIn()
           && (resource.data.customerId == request.auth.uid || isTenantStaff(tenantId) || isPlatformAdmin());
-        allow list: if isSignedIn() && (isTenantStaff(tenantId) || isPlatformAdmin());
+        // Also backs the customer's cross-tenant "Meus Pedidos" collectionGroup("orders")
+        // query — Firestore filters per-doc, so a customer only ever sees their own.
+        allow list: if isSignedIn()
+          && (isTenantStaff(tenantId) || isPlatformAdmin() || resource.data.customerId == request.auth.uid);
         allow create: if isSignedIn() && request.resource.data.customerId == request.auth.uid;
         // Staff may only change order status, never payment/total fields (those are
         // owned by Cloud Functions via the Admin SDK, which bypasses these rules).

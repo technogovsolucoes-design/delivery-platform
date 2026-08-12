@@ -17,8 +17,9 @@ export default function LoginPage() {
     setError(null);
     setSubmitting(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      router.replace("/pedidos");
+      const credential = await signInWithEmailAndPassword(auth, email, password);
+      const tokenResult = await credential.user.getIdTokenResult();
+      router.replace(tokenResult.claims.role === "platform_admin" ? "/admin" : "/pedidos");
     } catch {
       setError("Não foi possível entrar. Verifique o e-mail e a senha.");
     } finally {

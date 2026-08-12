@@ -13,6 +13,7 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "seed": "tsx scripts/seed-demo-data.ts",
+    "make-admin": "tsx scripts/make-platform-admin.ts",
     "typecheck:scripts": "tsc --noEmit"
   },
   "dependencies": {

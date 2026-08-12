@@ -13,10 +13,23 @@ service firebase.storage {
         && request.auth.token.tenantId == tenantId;
     }
 
+    function isPlatformAdmin() {
+      return isSignedIn() && request.auth.token.role == 'platform_admin';
+    }
+
     // Product images: publicly readable, only the tenant's own staff can upload.
     match /tenants/{tenantId}/products/{allPaths=**} {
       allow read: if true;
       allow write: if isTenantStaff(tenantId)
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    // Store logos: publicly readable. Platform admins upload at tenant creation time
+    // (before a staff record exists); the owner can update it afterwards.
+    match /tenants/{tenantId}/logo/{allPaths=**} {
+      allow read: if true;
+      allow write: if (isTenantStaff(tenantId) || isPlatformAdmin())
         && request.resource.size < 5 * 1024 * 1024
         && request.resource.contentType.matches('image/.*');
     }

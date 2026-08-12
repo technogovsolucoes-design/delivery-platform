@@ -6,12 +6,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 
 const NAV_ITEMS = [
-  { href: "/estoque", label: "Estoque", icon: "📦" },
-  { href: "/pedidos", label: "Pedidos", icon: "🧾" },
-  { href: "/pagamentos", label: "Pagamentos", icon: "💳" },
+  { href: "/admin", label: "Lojas", icon: "🏬" },
+  { href: "/admin/nova", label: "Nova loja", icon: "➕" },
 ];
 
-export default function DashboardLayout({ children }: { children: ReactNode }) {
+export default function AdminLayout({ children }: { children: ReactNode }) {
   const { user, claims, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -22,12 +21,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       router.replace("/login");
       return;
     }
-    if (claims?.role === "platform_admin") {
-      router.replace("/admin");
+    if (claims?.role !== "platform_admin") {
+      router.replace("/pedidos");
     }
   }, [loading, user, claims, router]);
 
-  if (loading || !user || claims?.role === "platform_admin") {
+  if (loading || !user || claims?.role !== "platform_admin") {
     return <div className="center-screen">Carregando...</div>;
   }
 
@@ -37,8 +36,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <div className="brand">
           <div className="brand-mark">🍹</div>
           <div>
-            <div className="brand-name">{claims?.tenantId ?? "Minha loja"}</div>
-            <div className="brand-sub">Painel do lojista</div>
+            <div className="brand-name">Administração</div>
+            <div className="brand-sub">Tião Beer Delivery</div>
           </div>
         </div>
         <nav>
