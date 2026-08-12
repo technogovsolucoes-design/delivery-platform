@@ -9,6 +9,9 @@ interface CreatePaymentPreferenceRequest {
   orderId: string;
 }
 
+const CUSTOMER_WEB_URL = "https://delivery-customer-web-hazel.vercel.app";
+const WEBHOOK_URL = "https://mpwebhook-jzzt2h3tsq-uc.a.run.app";
+
 export const createPaymentPreference = onCall<CreatePaymentPreferenceRequest>(
   { secrets: [mpAccessToken] },
   async (request) => {
@@ -48,6 +51,13 @@ export const createPaymentPreference = onCall<CreatePaymentPreferenceRequest>(
         // (roadmap item — mpSellerId is null until then, so this falls back to a
         // regular, non-split preference on the platform's own MP account).
         ...(tenant?.mpSellerId ? { collector_id: Number(tenant.mpSellerId) } : {}),
+        notification_url: WEBHOOK_URL,
+        back_urls: {
+          success: `${CUSTOMER_WEB_URL}/pedidos`,
+          pending: `${CUSTOMER_WEB_URL}/pedidos`,
+          failure: `${CUSTOMER_WEB_URL}/pedidos`,
+        },
+        auto_return: "approved",
       },
     });
 

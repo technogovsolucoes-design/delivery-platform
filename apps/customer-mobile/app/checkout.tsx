@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
+import { ActivityIndicator, Linking, ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { addDoc, collection, doc, getDoc } from "firebase/firestore";
+import { httpsCallable } from "firebase/functions";
 import type { Order, OrderItem, Tenant, UserAddress, UserProfile } from "@delivery/shared-types";
-import { db } from "@/lib/firebase";
+import { db, functions } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import { useCart } from "@/lib/cart-context";
 import { formatCents } from "@/lib/format";
@@ -13,6 +14,11 @@ import { AddressForm, EMPTY_ADDRESS } from "@/components/AddressForm";
 
 // Flat placeholder until real distance-based pricing is implemented.
 const DELIVERY_FEE_CENTS = 500;
+
+interface CreatePaymentPreferenceResponse {
+  preferenceId: string | null;
+  initPoint: string | null;
+}
 
 export default function CheckoutScreen() {
   const router = useRouter();
@@ -23,7 +29,7 @@ export default function CheckoutScreen() {
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [confirmedOrderId, setConfirmedOrderId] = useState<string | null>(null);
+  const [paymentReady, setPaymentReady] = useState<{ orderId: string; initPoint: string } | null>(null);
 
   // Pre-fill from the customer's saved profile address, editable in place.
   useEffect(() => {
@@ -91,28 +97,39 @@ export default function CheckoutScreen() {
       };
 
       const orderRef = await addDoc(collection(db, "tenants", cart.tenantId, "orders"), order);
-      setConfirmedOrderId(orderRef.id);
+
+      const createPaymentPreference = httpsCallable<
+        { tenantId: string; orderId: string },
+        CreatePaymentPreferenceResponse
+      >(functions, "createPaymentPreference");
+      const response = await createPaymentPreference({ tenantId: cart.tenantId, orderId: orderRef.id });
+
+      if (!response.data.initPoint) {
+        throw new Error("Mercado Pago did not return a checkout link.");
+      }
+
       cart.clear();
+      setPaymentReady({ orderId: orderRef.id, initPoint: response.data.initPoint });
     } catch (err) {
-      console.error("Failed to create order", err);
-      setError("Não foi possível confirmar o pedido. Tente novamente.");
+      console.error("Failed to create order/payment preference", err);
+      setError("Não foi possível preparar o pagamento. Tente novamente.");
     } finally {
       setSubmitting(false);
     }
   }
 
-  if (confirmedOrderId) {
+  if (paymentReady) {
     return (
       <View style={[styles.container, styles.confirmContainer, { paddingTop: insets.top + 64 }]}>
-        <Text style={{ fontSize: 48, marginBottom: spacing.lg }}>🎉</Text>
-        <Text style={styles.confirmTitle}>Pedido confirmado!</Text>
-        <Text style={styles.confirmMeta}>Nº {confirmedOrderId.slice(0, 8)}</Text>
-        <Text style={styles.confirmNote}>
-          O pagamento será processado na próxima etapa — por enquanto o pedido fica com status
-          &quot;aguardando pagamento&quot;.
-        </Text>
-        <Pressable style={styles.checkoutButton} onPress={() => router.replace("/")}>
-          <Text style={styles.checkoutButtonText}>Voltar ao início</Text>
+        <Text style={{ fontSize: 48, marginBottom: spacing.lg }}>💳</Text>
+        <Text style={styles.confirmTitle}>Pedido criado!</Text>
+        <Text style={styles.confirmMeta}>Nº {paymentReady.orderId.slice(0, 8)}</Text>
+        <Text style={styles.confirmNote}>Falta só pagar para a loja começar a preparar.</Text>
+        <Pressable style={styles.checkoutButton} onPress={() => Linking.openURL(paymentReady.initPoint)}>
+          <Text style={styles.checkoutButtonText}>Pagar com Mercado Pago</Text>
+        </Pressable>
+        <Pressable style={[styles.checkoutButton, styles.secondaryButton]} onPress={() => router.replace("/pedidos")}>
+          <Text style={[styles.checkoutButtonText, styles.secondaryButtonText]}>Ver meus pedidos</Text>
         </Pressable>
       </View>
     );
@@ -167,7 +184,7 @@ export default function CheckoutScreen() {
           <ActivityIndicator color={colors.white} />
         ) : (
           <Text style={styles.checkoutButtonText}>
-            {!addressComplete ? "Preencha o endereço" : "Confirmar pedido"}
+            {!addressComplete ? "Preencha o endereço" : "Ir para pagamento"}
           </Text>
         )}
       </Pressable>
@@ -216,6 +233,8 @@ const styles = StyleSheet.create({
   },
   checkoutButtonDisabled: { opacity: 0.4 },
   checkoutButtonText: { color: colors.white, ...type.bodyBold },
+  secondaryButton: { backgroundColor: colors.surfaceRaised, marginTop: spacing.md },
+  secondaryButtonText: { color: colors.textPrimary },
   confirmContainer: { alignItems: "center", paddingHorizontal: spacing.xl },
   confirmTitle: { color: colors.textPrimary, ...type.h1, marginBottom: spacing.xs },
   confirmMeta: { color: colors.textSecondary, ...type.body, marginBottom: spacing.lg },
