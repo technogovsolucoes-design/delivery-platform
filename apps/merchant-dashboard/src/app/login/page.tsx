@@ -33,7 +33,7 @@ export default function LoginPage() {
           <div className="brand-mark">🍹</div>
           <div>
             <div className="brand-name">Painel do Lojista</div>
-            <div className="brand-sub">Delivery Bebidas</div>
+            <div className="brand-sub">Tião Delivery</div>
           </div>
         </div>
 
