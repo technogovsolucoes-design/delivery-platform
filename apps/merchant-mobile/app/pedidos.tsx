@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { collection, doc, onSnapshot, orderBy, query, updateDoc } from "firebase/firestore";
 import type { Order } from "@delivery/shared-types";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import { formatCents } from "@/lib/format";
 import { ORDER_STATUS_LABEL, nextStatus } from "@/lib/order-status";
+import { colors, radius, spacing, statusTint, type } from "@/lib/theme";
 
 export default function PedidosScreen() {
   const { claims } = useAuth();
+  const insets = useSafeAreaInsets();
   const tenantId = claims?.tenantId ?? null;
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +45,7 @@ export default function PedidosScreen() {
 
   if (!tenantId) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { paddingTop: insets.top + spacing.lg }]}>
         <Text style={styles.title}>Pedidos</Text>
         <Text style={styles.empty}>
           Sua conta ainda não está vinculada a nenhuma loja. Peça para um admin configurar isso.
@@ -52,24 +55,32 @@ export default function PedidosScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top + spacing.lg }]}>
       <Text style={styles.title}>Pedidos</Text>
       {loading ? (
-        <ActivityIndicator color="#4f8cff" style={{ marginTop: 32 }} />
+        <ActivityIndicator color={colors.accent} style={{ marginTop: 32 }} />
       ) : orders.length === 0 ? (
-        <Text style={styles.empty}>Nenhum pedido recebido ainda.</Text>
+        <View style={styles.emptyState}>
+          <Text style={{ fontSize: 40, marginBottom: spacing.md }}>🧾</Text>
+          <Text style={styles.empty}>Nenhum pedido recebido ainda.</Text>
+        </View>
       ) : (
         <FlatList
           data={orders}
           keyExtractor={(item) => item.id}
+          contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.xl }}
           renderItem={({ item }) => {
             const next = nextStatus(item.status);
+            const tint = statusTint(item.status);
             return (
               <View style={styles.card}>
-                <Text style={styles.cardTitle}>Pedido {item.id.slice(0, 8)}</Text>
-                <Text style={styles.cardMeta}>
-                  {formatCents(item.totalCents)} · {ORDER_STATUS_LABEL[item.status]}
-                </Text>
+                <View style={styles.cardHeader}>
+                  <Text style={styles.cardTitle}>Pedido #{item.id.slice(0, 8)}</Text>
+                  <View style={[styles.badge, { backgroundColor: tint.bg }]}>
+                    <Text style={[styles.badgeText, { color: tint.fg }]}>{ORDER_STATUS_LABEL[item.status]}</Text>
+                  </View>
+                </View>
+                <Text style={styles.cardPrice}>{formatCents(item.totalCents)}</Text>
                 {next && (
                   <Pressable style={styles.advanceButton} onPress={() => advanceStatus(item.id, next)}>
                     <Text style={styles.advanceButtonText}>Avançar para &quot;{ORDER_STATUS_LABEL[next]}&quot;</Text>
@@ -85,12 +96,23 @@ export default function PedidosScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0b0d10", padding: 16, paddingTop: 60 },
-  title: { color: "#e8eaed", fontSize: 22, fontWeight: "700", marginBottom: 16 },
-  empty: { color: "#9aa1ab" },
-  card: { backgroundColor: "#14171b", borderRadius: 12, padding: 16, marginBottom: 12 },
-  cardTitle: { color: "#e8eaed", fontSize: 16, fontWeight: "600" },
-  cardMeta: { color: "#9aa1ab", fontSize: 13, marginTop: 4, marginBottom: 12 },
-  advanceButton: { backgroundColor: "#4f8cff", borderRadius: 8, padding: 10, alignItems: "center" },
-  advanceButtonText: { color: "#fff", fontWeight: "600", fontSize: 13 },
+  container: { flex: 1, backgroundColor: colors.bg },
+  title: { color: colors.textPrimary, ...type.h1, paddingHorizontal: spacing.lg, marginBottom: spacing.lg },
+  empty: { color: colors.textSecondary, ...type.body, textAlign: "center" },
+  emptyState: { alignItems: "center", paddingTop: 32, paddingHorizontal: spacing.xl },
+  card: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: spacing.sm },
+  cardTitle: { color: colors.textPrimary, ...type.bodyBold },
+  cardPrice: { color: colors.textPrimary, ...type.h2, marginBottom: spacing.md },
+  badge: { paddingHorizontal: spacing.sm, paddingVertical: 4, borderRadius: radius.pill },
+  badgeText: { ...type.caption },
+  advanceButton: { backgroundColor: colors.accent, borderRadius: radius.md, padding: spacing.sm, alignItems: "center" },
+  advanceButtonText: { color: colors.white, ...type.caption },
 });

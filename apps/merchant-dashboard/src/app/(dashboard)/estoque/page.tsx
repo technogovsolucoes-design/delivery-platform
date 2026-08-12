@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { db } from "@/lib/firebase";
 import { formatCents } from "@/lib/format";
 import { NoTenantNotice } from "@/components/no-tenant-notice";
+import { CategoryTag } from "@/components/category-tag";
 
 export default function EstoquePage() {
   const { claims } = useAuth();
@@ -95,7 +96,10 @@ export default function EstoquePage() {
   if (!tenantId) {
     return (
       <div>
-        <h1>Estoque</h1>
+        <div className="page-header">
+          <p className="eyebrow">Gestão</p>
+          <h1>Estoque</h1>
+        </div>
         <NoTenantNotice />
       </div>
     );
@@ -103,26 +107,28 @@ export default function EstoquePage() {
 
   return (
     <div>
-      <h1>Estoque</h1>
+      <div className="page-header">
+        <p className="eyebrow">Gestão</p>
+        <h1>Estoque</h1>
+        <p>Adicione produtos e mantenha a quantidade em estoque atualizada.</p>
+      </div>
 
-      <form onSubmit={handleAddProduct} className="card" style={{ maxWidth: 480, marginBottom: 24 }}>
-        <input placeholder="Nome do produto" value={name} onChange={(e) => setName(e.target.value)} required />
-        <input
-          placeholder="Preço (R$)"
-          value={priceReais}
-          onChange={(e) => setPriceReais(e.target.value)}
-          inputMode="decimal"
-          required
-        />
-        <input
-          placeholder="Estoque inicial"
-          value={stockQuantity}
-          onChange={(e) => setStockQuantity(e.target.value)}
-          inputMode="numeric"
-          required
-        />
-        {error && <p style={{ color: "#ff6b6b", fontSize: 14 }}>{error}</p>}
-        <button type="submit" disabled={submitting}>
+      <form onSubmit={handleAddProduct} className="card" style={{ maxWidth: 460, marginBottom: 32 }}>
+        <h2 style={{ marginBottom: 16 }}>Novo produto</h2>
+        <label htmlFor="p-name">Nome</label>
+        <input id="p-name" placeholder="Ex: Cerveja Pilsen 350ml" value={name} onChange={(e) => setName(e.target.value)} required />
+        <div style={{ display: "flex", gap: 12 }}>
+          <div style={{ flex: 1 }}>
+            <label htmlFor="p-price">Preço (R$)</label>
+            <input id="p-price" placeholder="5,90" value={priceReais} onChange={(e) => setPriceReais(e.target.value)} inputMode="decimal" required />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label htmlFor="p-stock">Estoque inicial</label>
+            <input id="p-stock" placeholder="0" value={stockQuantity} onChange={(e) => setStockQuantity(e.target.value)} inputMode="numeric" required />
+          </div>
+        </div>
+        {error && <p style={{ color: "var(--danger)", fontSize: 13, marginTop: -4 }}>{error}</p>}
+        <button type="submit" className="btn-block" disabled={submitting}>
           {submitting ? "Adicionando..." : "Adicionar produto"}
         </button>
       </form>
@@ -130,53 +136,57 @@ export default function EstoquePage() {
       {loading ? (
         <p>Carregando...</p>
       ) : products.length === 0 ? (
-        <p>Nenhum produto cadastrado ainda.</p>
+        <div className="card empty-state">
+          <div className="empty-state-icon">📦</div>
+          <p style={{ margin: 0 }}>Nenhum produto cadastrado ainda.</p>
+        </div>
       ) : (
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ textAlign: "left", color: "var(--muted)", fontSize: 13 }}>
-              <th style={{ padding: "8px 0" }}>Produto</th>
-              <th>Preço</th>
-              <th>Estoque</th>
-              <th>Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((product) => (
-              <tr key={product.id} style={{ borderTop: "1px solid var(--border)" }}>
-                <td style={{ padding: "10px 0" }}>{product.name}</td>
-                <td>{formatCents(product.priceCents)}</td>
-                <td>
-                  <input
-                    type="number"
-                    value={product.stockQuantity}
-                    onChange={(e) => handleStockChange(product.id, Number(e.target.value))}
-                    style={{ width: 72, marginBottom: 0, padding: "4px 8px" }}
-                  />
-                </td>
-                <td>
-                  <button
-                    type="button"
-                    onClick={() => handleToggleActive(product)}
-                    style={{ width: "auto", padding: "4px 10px", background: product.active ? "#2e7d4f" : "#4a4f57" }}
-                  >
-                    {product.active ? "Ativo" : "Inativo"}
-                  </button>
-                </td>
-                <td>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(product.id)}
-                    style={{ width: "auto", padding: "4px 10px", background: "#7a2e2e" }}
-                  >
-                    Excluir
-                  </button>
-                </td>
+        <div className="card" style={{ padding: 8 }}>
+          <table>
+            <thead>
+              <tr>
+                <th colSpan={2}>Produto</th>
+                <th>Preço</th>
+                <th>Estoque</th>
+                <th>Status</th>
+                <th></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {products.map((product) => (
+                <tr key={product.id}>
+                  <td style={{ width: 56, paddingRight: 0 }}>
+                    <CategoryTag category={product.category} />
+                  </td>
+                  <td style={{ fontWeight: 600 }}>{product.name}</td>
+                  <td>{formatCents(product.priceCents)}</td>
+                  <td>
+                    <input
+                      type="number"
+                      value={product.stockQuantity}
+                      onChange={(e) => handleStockChange(product.id, Number(e.target.value))}
+                      style={{ width: 72, marginBottom: 0, padding: "6px 10px" }}
+                    />
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleActive(product)}
+                      className={`btn-sm ${product.active ? "btn-success" : "btn-ghost"}`}
+                    >
+                      {product.active ? "Ativo" : "Inativo"}
+                    </button>
+                  </td>
+                  <td>
+                    <button type="button" onClick={() => handleDelete(product.id)} className="btn-sm btn-danger">
+                      Excluir
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

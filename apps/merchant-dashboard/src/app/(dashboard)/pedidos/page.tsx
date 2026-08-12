@@ -8,6 +8,7 @@ import { db } from "@/lib/firebase";
 import { formatCents } from "@/lib/format";
 import { ORDER_STATUS_LABEL, canCancel, nextStatus } from "@/lib/order-status";
 import { NoTenantNotice } from "@/components/no-tenant-notice";
+import { StatusBadge } from "@/components/status-badge";
 
 export default function PedidosPage() {
   const { claims } = useAuth();
@@ -45,7 +46,10 @@ export default function PedidosPage() {
   if (!tenantId) {
     return (
       <div>
-        <h1>Pedidos</h1>
+        <div className="page-header">
+          <p className="eyebrow">Gestão</p>
+          <h1>Pedidos</h1>
+        </div>
         <NoTenantNotice />
       </div>
     );
@@ -53,43 +57,47 @@ export default function PedidosPage() {
 
   return (
     <div>
-      <h1>Pedidos</h1>
+      <div className="page-header">
+        <p className="eyebrow">Gestão</p>
+        <h1>Pedidos</h1>
+        <p>Fila de pedidos em tempo real.</p>
+      </div>
+
       {loading ? (
         <p>Carregando...</p>
       ) : orders.length === 0 ? (
-        <p>Nenhum pedido recebido ainda.</p>
+        <div className="card empty-state">
+          <div className="empty-state-icon">🧾</div>
+          <p style={{ margin: 0 }}>Nenhum pedido recebido ainda.</p>
+        </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {orders.map((order) => {
             const next = nextStatus(order.status);
             return (
               <div key={order.id} className="card">
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                  <strong>Pedido {order.id.slice(0, 8)}</strong>
-                  <span style={{ color: "var(--muted)", fontSize: 13 }}>{ORDER_STATUS_LABEL[order.status]}</span>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                  <strong>Pedido #{order.id.slice(0, 8)}</strong>
+                  <StatusBadge status={order.status} />
                 </div>
-                <ul style={{ margin: "0 0 8px", paddingLeft: 18, color: "var(--muted)", fontSize: 14 }}>
+                <ul style={{ margin: "0 0 12px", paddingLeft: 18, color: "var(--muted)", fontSize: 14 }}>
                   {order.items.map((item) => (
                     <li key={item.productId}>
                       {item.quantity}x {item.name}
                     </li>
                   ))}
                 </ul>
-                <div style={{ fontSize: 14, marginBottom: 12 }}>Total: {formatCents(order.totalCents)}</div>
+                <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>{formatCents(order.totalCents)}</div>
                 <div style={{ display: "flex", gap: 8 }}>
                   {next && (
-                    <button
-                      type="button"
-                      style={{ width: "auto", padding: "6px 14px" }}
-                      onClick={() => updateStatus(order.id, next)}
-                    >
+                    <button type="button" className="btn-sm" onClick={() => updateStatus(order.id, next)}>
                       Avançar para &quot;{ORDER_STATUS_LABEL[next]}&quot;
                     </button>
                   )}
                   {canCancel(order.status) && (
                     <button
                       type="button"
-                      style={{ width: "auto", padding: "6px 14px", background: "#7a2e2e" }}
+                      className="btn-sm btn-danger"
                       onClick={() => updateStatus(order.id, "cancelled")}
                     >
                       Cancelar

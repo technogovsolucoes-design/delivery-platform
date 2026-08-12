@@ -28,24 +28,35 @@ export default function LoginPage() {
 
   return (
     <div className="center-screen">
-      <form className="card" onSubmit={handleSubmit}>
-        <h1 style={{ marginTop: 0, fontSize: 20 }}>Painel do Lojista</h1>
+      <form className="card" onSubmit={handleSubmit} style={{ width: 360 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
+          <div className="brand-mark">🍹</div>
+          <div>
+            <div className="brand-name">Painel do Lojista</div>
+            <div className="brand-sub">Delivery Bebidas</div>
+          </div>
+        </div>
+
+        <label htmlFor="email">E-mail</label>
         <input
+          id="email"
           type="email"
-          placeholder="E-mail"
+          placeholder="voce@exemplo.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
+        <label htmlFor="password">Senha</label>
         <input
+          id="password"
           type="password"
-          placeholder="Senha"
+          placeholder="••••••••"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        {error && <p style={{ color: "#ff6b6b", fontSize: 14 }}>{error}</p>}
-        <button type="submit" disabled={submitting}>
+        {error && <p style={{ color: "var(--danger)", fontSize: 13, marginTop: -4, marginBottom: 16 }}>{error}</p>}
+        <button type="submit" className="btn-block" disabled={submitting}>
           {submitting ? "Entrando..." : "Entrar"}
         </button>
       </form>
