@@ -1,17 +1,27 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { signOut } from "firebase/auth";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import type { Tenant } from "@delivery/shared-types";
-import { db } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
+import { useAuth } from "@/lib/auth-context";
 import { categoryStyle, colors, radius, spacing, type } from "@/lib/theme";
+import logo from "../assets/images/logo.png";
 
 export default function StoresScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { user, loading: authLoading } = useAuth();
   const [stores, setStores] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace("/login");
+    }
+  }, [authLoading, user, router]);
 
   useEffect(() => {
     const storesQuery = query(
@@ -33,10 +43,27 @@ export default function StoresScreen() {
     );
   }, []);
 
+  if (authLoading || !user) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <ActivityIndicator color={colors.accent} />
+      </View>
+    );
+  }
+
   return (
-    <View style={[styles.container, { paddingTop: insets.top + spacing.md }]}>
+    <View style={[styles.container, { paddingTop: insets.top + spacing.sm }]}>
       <View style={styles.header}>
-        <Text style={styles.eyebrow}>Bebidas</Text>
+        <View style={styles.brandRow}>
+          <Image source={logo} style={styles.logo} resizeMode="contain" />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.brandName}>Tião Beer Delivery</Text>
+            <Text style={styles.brandTagline}>Suas bebidas, onde você estiver!</Text>
+          </View>
+          <Pressable onPress={() => signOut(auth)} hitSlop={12}>
+            <Text style={styles.logout}>Sair</Text>
+          </Pressable>
+        </View>
         <Text style={styles.title}>O que vamos beber hoje?</Text>
       </View>
 
@@ -79,8 +106,13 @@ export default function StoresScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
+  centered: { alignItems: "center", justifyContent: "center" },
   header: { paddingHorizontal: spacing.lg, marginBottom: spacing.lg },
-  eyebrow: { color: colors.accent, ...type.caption, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 },
+  brandRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm, marginBottom: spacing.lg },
+  logo: { width: 40, height: 40, borderRadius: radius.sm },
+  brandName: { color: colors.textPrimary, ...type.bodyBold, fontSize: 16 },
+  brandTagline: { color: colors.textSecondary, ...type.caption, fontWeight: "500" },
+  logout: { color: colors.textSecondary, ...type.small },
   title: { color: colors.textPrimary, ...type.h1 },
   emptyState: { alignItems: "center", justifyContent: "center", paddingTop: 64, paddingHorizontal: spacing.xl },
   emptyTitle: { color: colors.textPrimary, ...type.h2, marginBottom: spacing.xs },

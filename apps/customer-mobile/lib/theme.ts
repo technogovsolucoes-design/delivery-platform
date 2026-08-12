@@ -6,8 +6,9 @@ export const colors = {
   textPrimary: "#F3F4F6",
   textSecondary: "#9AA3AE",
   textMuted: "#6B7280",
-  accent: "#FF6B35",
-  accentMuted: "#4A2A1A",
+  // Matches the Tião Beer Delivery mascot logo's gold/amber.
+  accent: "#F0A202",
+  accentMuted: "#3D2E0A",
   success: "#33D17A",
   danger: "#FF5C5C",
   white: "#FFFFFF",

@@ -1,7 +1,7 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { Preference } from "mercadopago";
-import type { Order, Tenant } from "@delivery/shared-types";
-import { db } from "./lib/firebase";
+import type { Order, Tenant } from "../../packages/shared-types/src";
+import { getDb } from "./lib/firebase";
 import { getMpClient, mpAccessToken, encodeExternalReference } from "./lib/mercadoPago";
 
 interface CreatePaymentPreferenceRequest {
@@ -16,6 +16,7 @@ export const createPaymentPreference = onCall<CreatePaymentPreferenceRequest>(
       throw new HttpsError("unauthenticated", "Login required.");
     }
 
+    const db = getDb();
     const { tenantId, orderId } = request.data;
     const orderRef = db.doc(`tenants/${tenantId}/orders/${orderId}`);
     const orderSnap = await orderRef.get();

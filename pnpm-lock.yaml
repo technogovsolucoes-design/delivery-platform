@@ -220,15 +220,6 @@ importers:
         specifier: ^2.2.0
         version: 2.13.0
     devDependencies:
-      '@delivery/config':
-        specifier: workspace:*
-        version: link:../packages/config
-      '@delivery/firebase-config':
-        specifier: workspace:*
-        version: link:../packages/firebase-config
-      '@delivery/shared-types':
-        specifier: workspace:*
-        version: link:../packages/shared-types
       '@types/node':
         specifier: ^22.10.5
         version: 22.20.1

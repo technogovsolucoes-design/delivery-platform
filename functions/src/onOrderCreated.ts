@@ -1,7 +1,7 @@
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import type { Transaction } from "firebase-admin/firestore";
-import type { Order } from "@delivery/shared-types";
-import { db } from "./lib/firebase";
+import type { Order } from "../../packages/shared-types/src";
+import { getDb } from "./lib/firebase";
 
 export const onOrderCreated = onDocumentCreated(
   "tenants/{tenantId}/orders/{orderId}",
@@ -10,6 +10,7 @@ export const onOrderCreated = onDocumentCreated(
     const tenantId = event.params.tenantId;
     if (!order) return;
 
+    const db = getDb();
     await db.runTransaction(async (tx: Transaction) => {
       for (const item of order.items) {
         const productRef = db.doc(`tenants/${tenantId}/products/${item.productId}`);

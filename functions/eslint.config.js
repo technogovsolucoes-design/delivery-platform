@@ -1,3 +1,3 @@
-const base = require("@delivery/config/eslint.base.js");
+const base = require("../packages/config/eslint.base.js");
 
 module.exports = base;

@@ -1,8 +1,8 @@
 import { onRequest } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 import { Payment } from "mercadopago";
-import type { PaymentStatus } from "@delivery/shared-types";
-import { db } from "./lib/firebase";
+import type { PaymentStatus } from "../../packages/shared-types/src";
+import { getDb } from "./lib/firebase";
 import { getMpClient, mpAccessToken, decodeExternalReference } from "./lib/mercadoPago";
 
 function mapMpStatus(mpStatus: string | undefined): PaymentStatus {
@@ -40,7 +40,7 @@ export const mpWebhook = onRequest({ secrets: [mpAccessToken] }, async (req, res
   }
 
   const paymentStatus = mapMpStatus(paymentInfo.status);
-  const orderRef = db.doc(`tenants/${decoded.tenantId}/orders/${decoded.orderId}`);
+  const orderRef = getDb().doc(`tenants/${decoded.tenantId}/orders/${decoded.orderId}`);
 
   await orderRef.update({
     "payment.paymentId": String(paymentId),

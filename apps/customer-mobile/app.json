@@ -1,18 +1,22 @@
 {
   "expo": {
-    "name": "Tião Delivery",
+    "name": "Tião Beer Delivery",
     "slug": "delivery-customer-mobile",
     "scheme": "delivery-customer",
     "version": "0.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
+    "icon": "./assets/images/logo.png",
     "newArchEnabled": true,
     "plugins": ["expo-router"],
-    "experiments": {
-      "typedRoutes": true
+    "splash": {
+      "image": "./assets/images/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B0D10"
     },
     "web": {
-      "bundler": "metro"
+      "bundler": "metro",
+      "favicon": "./assets/images/logo.png"
     }
   }
 }
