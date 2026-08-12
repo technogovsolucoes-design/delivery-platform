@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, View, Pressable } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { addDoc, collection, doc, getDoc } from "firebase/firestore";
 import type { Order, OrderItem, Tenant } from "@delivery/shared-types";
@@ -7,13 +8,15 @@ import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import { useCart } from "@/lib/cart-context";
 import { formatCents } from "@/lib/format";
+import { colors, radius, spacing, type } from "@/lib/theme";
 
 // Flat placeholder until real distance-based pricing is implemented.
 const DELIVERY_FEE_CENTS = 500;
 
 export default function CheckoutScreen() {
   const router = useRouter();
-  const { user } = useAuth();
+  const insets = useSafeAreaInsets();
+  const { user, loading: authLoading } = useAuth();
   const cart = useCart();
   const [street, setStreet] = useState("");
   const [number, setNumber] = useState("");
@@ -23,7 +26,8 @@ export default function CheckoutScreen() {
   const [confirmedOrderId, setConfirmedOrderId] = useState<string | null>(null);
 
   const totalCents = cart.subtotalCents + DELIVERY_FEE_CENTS;
-  const canSubmit = Boolean(street && number && neighborhood && cart.tenantId && user && !submitting);
+  const addressComplete = Boolean(street && number && neighborhood);
+  const canSubmit = Boolean(addressComplete && cart.tenantId && user && !submitting);
 
   async function handleConfirm() {
     if (!cart.tenantId || !user) return;
@@ -85,9 +89,10 @@ export default function CheckoutScreen() {
 
   if (confirmedOrderId) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, styles.confirmContainer, { paddingTop: insets.top + 64 }]}>
+        <Text style={{ fontSize: 48, marginBottom: spacing.lg }}>🎉</Text>
         <Text style={styles.confirmTitle}>Pedido confirmado!</Text>
-        <Text style={styles.confirmMeta}>Número do pedido: {confirmedOrderId}</Text>
+        <Text style={styles.confirmMeta}>Nº {confirmedOrderId.slice(0, 8)}</Text>
         <Text style={styles.confirmNote}>
           O pagamento será processado na próxima etapa — por enquanto o pedido fica com status
           &quot;aguardando pagamento&quot;.
@@ -100,30 +105,46 @@ export default function CheckoutScreen() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 32 }}>
-      <Text style={styles.title}>Endereço de entrega</Text>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ padding: spacing.lg, paddingTop: insets.top + spacing.md, paddingBottom: spacing.xl }}
+    >
+      <Text style={styles.title}>Finalizar pedido</Text>
+
+      {!authLoading && !user && (
+        <View style={styles.authWarning}>
+          <Text style={styles.authWarningText}>
+            Não foi possível iniciar sua sessão. Verifique sua conexão e tente reabrir o app.
+          </Text>
+        </View>
+      )}
+
+      <Text style={styles.sectionLabel}>Endereço de entrega</Text>
       <TextInput
         style={styles.input}
         placeholder="Rua"
-        placeholderTextColor="#9aa1ab"
+        placeholderTextColor={colors.textMuted}
         value={street}
         onChangeText={setStreet}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Número"
-        placeholderTextColor="#9aa1ab"
-        value={number}
-        onChangeText={setNumber}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Bairro"
-        placeholderTextColor="#9aa1ab"
-        value={neighborhood}
-        onChangeText={setNeighborhood}
-      />
+      <View style={{ flexDirection: "row", gap: spacing.sm }}>
+        <TextInput
+          style={[styles.input, { flex: 1 }]}
+          placeholder="Número"
+          placeholderTextColor={colors.textMuted}
+          value={number}
+          onChangeText={setNumber}
+        />
+        <TextInput
+          style={[styles.input, { flex: 2 }]}
+          placeholder="Bairro"
+          placeholderTextColor={colors.textMuted}
+          value={neighborhood}
+          onChangeText={setNeighborhood}
+        />
+      </View>
 
+      <Text style={styles.sectionLabel}>Resumo</Text>
       <View style={styles.summary}>
         <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>Subtotal</Text>
@@ -133,9 +154,9 @@ export default function CheckoutScreen() {
           <Text style={styles.totalLabel}>Entrega</Text>
           <Text style={styles.totalValue}>{formatCents(DELIVERY_FEE_CENTS)}</Text>
         </View>
-        <View style={styles.totalRow}>
-          <Text style={[styles.totalLabel, { fontWeight: "700" }]}>Total</Text>
-          <Text style={[styles.totalValue, { fontSize: 18 }]}>{formatCents(totalCents)}</Text>
+        <View style={[styles.totalRow, styles.totalRowFinal]}>
+          <Text style={styles.totalLabelFinal}>Total</Text>
+          <Text style={styles.totalValueFinal}>{formatCents(totalCents)}</Text>
         </View>
       </View>
 
@@ -146,33 +167,71 @@ export default function CheckoutScreen() {
         onPress={handleConfirm}
         disabled={!canSubmit}
       >
-        {submitting ? <ActivityIndicator color="#fff" /> : <Text style={styles.checkoutButtonText}>Confirmar pedido</Text>}
+        {submitting ? (
+          <ActivityIndicator color={colors.white} />
+        ) : (
+          <Text style={styles.checkoutButtonText}>
+            {!addressComplete ? "Preencha o endereço" : "Confirmar pedido"}
+          </Text>
+        )}
       </Pressable>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0b0d10", padding: 16 },
-  title: { color: "#e8eaed", fontSize: 18, fontWeight: "700", marginBottom: 12 },
-  input: {
-    backgroundColor: "#14171b",
-    borderColor: "#23272e",
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    color: "#e8eaed",
-    marginBottom: 12,
+  container: { flex: 1, backgroundColor: colors.bg },
+  title: { color: colors.textPrimary, ...type.h1, marginBottom: spacing.lg },
+  sectionLabel: {
+    color: colors.textSecondary,
+    ...type.caption,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: spacing.sm,
+    marginTop: spacing.lg,
   },
-  summary: { backgroundColor: "#14171b", borderRadius: 12, padding: 16, marginTop: 12, marginBottom: 16 },
-  totalRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
-  totalLabel: { color: "#9aa1ab", fontSize: 14 },
-  totalValue: { color: "#e8eaed", fontSize: 15, fontWeight: "600" },
-  error: { color: "#ff6b6b", fontSize: 13, marginBottom: 12 },
-  checkoutButton: { backgroundColor: "#4f8cff", borderRadius: 12, padding: 16, alignItems: "center" },
-  checkoutButtonDisabled: { opacity: 0.5 },
-  checkoutButtonText: { color: "#fff", fontWeight: "700", fontSize: 15 },
-  confirmTitle: { color: "#e8eaed", fontSize: 20, fontWeight: "700", marginTop: 32, marginBottom: 8 },
-  confirmMeta: { color: "#9aa1ab", fontSize: 14, marginBottom: 16 },
-  confirmNote: { color: "#9aa1ab", fontSize: 13, marginBottom: 24, lineHeight: 20 },
+  authWarning: {
+    backgroundColor: "rgba(255,92,92,0.12)",
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+  },
+  authWarningText: { color: colors.danger, ...type.small },
+  input: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderWidth: 1,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    color: colors.textPrimary,
+    marginBottom: spacing.sm,
+    ...type.body,
+  },
+  summary: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  totalRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: spacing.sm },
+  totalRowFinal: { marginBottom: 0, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border },
+  totalLabel: { color: colors.textSecondary, ...type.small },
+  totalValue: { color: colors.textPrimary, ...type.body },
+  totalLabelFinal: { color: colors.textPrimary, ...type.bodyBold },
+  totalValueFinal: { color: colors.accent, ...type.h2 },
+  error: { color: colors.danger, ...type.small, marginTop: spacing.md },
+  checkoutButton: {
+    backgroundColor: colors.accent,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    alignItems: "center",
+    marginTop: spacing.xl,
+  },
+  checkoutButtonDisabled: { opacity: 0.4 },
+  checkoutButtonText: { color: colors.white, ...type.bodyBold },
+  confirmContainer: { alignItems: "center", paddingHorizontal: spacing.xl },
+  confirmTitle: { color: colors.textPrimary, ...type.h1, marginBottom: spacing.xs },
+  confirmMeta: { color: colors.textSecondary, ...type.body, marginBottom: spacing.lg },
+  confirmNote: { color: colors.textSecondary, ...type.small, textAlign: "center", marginBottom: spacing.xxl, lineHeight: 20 },
 });

@@ -1,25 +1,32 @@
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useCart } from "@/lib/cart-context";
 import { formatCents } from "@/lib/format";
+import { colors, radius, spacing, type } from "@/lib/theme";
 
 export default function CartScreen() {
   const cart = useCart();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   if (cart.items.length === 0) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.empty}>Seu carrinho está vazio.</Text>
+      <View style={[styles.container, styles.emptyState, { paddingTop: insets.top + 64 }]}>
+        <Text style={{ fontSize: 40, marginBottom: spacing.md }}>🛒</Text>
+        <Text style={styles.emptyTitle}>Seu carrinho está vazio</Text>
+        <Text style={styles.emptyText}>Escolha uma loja e adicione produtos.</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top + spacing.md }]}>
+      <Text style={styles.title}>Seu carrinho</Text>
       <FlatList
         data={cart.items}
         keyExtractor={(item) => item.productId}
+        contentContainerStyle={{ paddingHorizontal: spacing.lg }}
         renderItem={({ item }) => (
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
@@ -45,7 +52,7 @@ export default function CartScreen() {
         )}
       />
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.lg }]}>
         <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>Subtotal</Text>
           <Text style={styles.totalValue}>{formatCents(cart.subtotalCents)}</Text>
@@ -59,33 +66,43 @@ export default function CartScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0b0d10", padding: 16 },
-  empty: { color: "#9aa1ab", textAlign: "center", marginTop: 32 },
+  container: { flex: 1, backgroundColor: colors.bg },
+  title: { color: colors.textPrimary, ...type.h1, paddingHorizontal: spacing.lg, marginBottom: spacing.lg },
+  emptyState: { alignItems: "center", justifyContent: "center", paddingHorizontal: spacing.xl },
+  emptyTitle: { color: colors.textPrimary, ...type.h2, marginBottom: spacing.xs },
+  emptyText: { color: colors.textSecondary, ...type.body, textAlign: "center" },
   row: {
-    backgroundColor: "#14171b",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    marginBottom: spacing.md,
     flexDirection: "row",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.border,
   },
-  itemName: { color: "#e8eaed", fontSize: 16, fontWeight: "600" },
-  itemMeta: { color: "#9aa1ab", fontSize: 13, marginTop: 4 },
-  qtyControls: { flexDirection: "row", alignItems: "center", gap: 12 },
+  itemName: { color: colors.textPrimary, ...type.bodyBold },
+  itemMeta: { color: colors.textSecondary, ...type.small, marginTop: 2 },
+  qtyControls: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
   qtyButton: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: "#23272e",
+    backgroundColor: colors.surfaceRaised,
     alignItems: "center",
     justifyContent: "center",
   },
-  qtyButtonText: { color: "#e8eaed", fontSize: 16, fontWeight: "700", marginTop: -2 },
-  qtyValue: { color: "#e8eaed", fontSize: 15, fontWeight: "600", minWidth: 18, textAlign: "center" },
-  footer: { borderTopWidth: 1, borderTopColor: "#23272e", paddingTop: 16, marginTop: 8 },
-  totalRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 16 },
-  totalLabel: { color: "#9aa1ab", fontSize: 15 },
-  totalValue: { color: "#e8eaed", fontSize: 18, fontWeight: "700" },
-  checkoutButton: { backgroundColor: "#4f8cff", borderRadius: 12, padding: 16, alignItems: "center" },
-  checkoutButtonText: { color: "#fff", fontWeight: "700", fontSize: 15 },
+  qtyButtonText: { color: colors.textPrimary, fontSize: 16, fontWeight: "700", marginTop: -2 },
+  qtyValue: { color: colors.textPrimary, ...type.bodyBold, minWidth: 18, textAlign: "center" },
+  footer: {
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingTop: spacing.lg,
+    paddingHorizontal: spacing.lg,
+  },
+  totalRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: spacing.md },
+  totalLabel: { color: colors.textSecondary, ...type.body },
+  totalValue: { color: colors.textPrimary, ...type.h2 },
+  checkoutButton: { backgroundColor: colors.accent, borderRadius: radius.md, padding: spacing.md, alignItems: "center" },
+  checkoutButtonText: { color: colors.white, ...type.bodyBold },
 });
