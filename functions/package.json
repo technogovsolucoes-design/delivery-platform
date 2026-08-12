@@ -7,7 +7,7 @@
     "node": "20"
   },
   "scripts": {
-    "build": "tsc --noEmit && esbuild src/index.ts --bundle --platform=node --target=node20 --format=cjs --outfile=lib/index.js --external:firebase-admin --external:firebase-functions --external:mercadopago",
+    "build": "tsc --noEmit && esbuild src/index.ts --bundle --platform=node --target=node20 --format=cjs --outfile=lib/index.js --external:firebase-admin --external:firebase-functions --external:mercadopago --external:resend",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "serve": "npm run build && firebase emulators:start --only functions",
@@ -16,7 +16,8 @@
   "dependencies": {
     "firebase-admin": "^13.0.2",
     "firebase-functions": "^6.2.0",
-    "mercadopago": "^2.2.0"
+    "mercadopago": "^2.2.0",
+    "resend": "^4.0.1"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
