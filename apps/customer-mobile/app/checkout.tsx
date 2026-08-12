@@ -1,14 +1,15 @@
-import { useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, View, Pressable } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { addDoc, collection, doc, getDoc } from "firebase/firestore";
-import type { Order, OrderItem, Tenant } from "@delivery/shared-types";
+import type { Order, OrderItem, Tenant, UserAddress, UserProfile } from "@delivery/shared-types";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import { useCart } from "@/lib/cart-context";
 import { formatCents } from "@/lib/format";
 import { colors, radius, spacing, type } from "@/lib/theme";
+import { AddressForm, EMPTY_ADDRESS } from "@/components/AddressForm";
 
 // Flat placeholder until real distance-based pricing is implemented.
 const DELIVERY_FEE_CENTS = 500;
@@ -18,15 +19,27 @@ export default function CheckoutScreen() {
   const insets = useSafeAreaInsets();
   const { user, loading: authLoading } = useAuth();
   const cart = useCart();
-  const [street, setStreet] = useState("");
-  const [number, setNumber] = useState("");
-  const [neighborhood, setNeighborhood] = useState("");
+  const [address, setAddress] = useState<UserAddress>(EMPTY_ADDRESS);
+  const [loadingProfile, setLoadingProfile] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmedOrderId, setConfirmedOrderId] = useState<string | null>(null);
 
+  // Pre-fill from the customer's saved profile address, editable in place.
+  useEffect(() => {
+    if (!user) {
+      setLoadingProfile(false);
+      return;
+    }
+    getDoc(doc(db, "users", user.uid)).then((snap) => {
+      const profile = snap.data() as UserProfile | undefined;
+      if (profile?.address) setAddress(profile.address);
+      setLoadingProfile(false);
+    });
+  }, [user]);
+
   const totalCents = cart.subtotalCents + DELIVERY_FEE_CENTS;
-  const addressComplete = Boolean(street && number && neighborhood);
+  const addressComplete = Boolean(address.cep && address.street && address.number && address.neighborhood && address.city && address.state);
   const canSubmit = Boolean(addressComplete && cart.tenantId && user && !submitting);
 
   async function handleConfirm() {
@@ -63,12 +76,13 @@ export default function CheckoutScreen() {
           platformFeeCents: Math.round(cart.subtotalCents * commissionRate),
         },
         deliveryAddress: {
-          street,
-          number,
-          neighborhood,
-          city: tenant?.address.city ?? "",
-          state: tenant?.address.state ?? "",
-          zipCode: "",
+          street: address.street,
+          number: address.number,
+          complement: address.complement,
+          neighborhood: address.neighborhood,
+          city: address.city,
+          state: address.state,
+          zipCode: address.cep,
           lat: 0,
           lng: 0,
         },
@@ -120,29 +134,11 @@ export default function CheckoutScreen() {
       )}
 
       <Text style={styles.sectionLabel}>Endereço de entrega</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Rua"
-        placeholderTextColor={colors.textMuted}
-        value={street}
-        onChangeText={setStreet}
-      />
-      <View style={{ flexDirection: "row", gap: spacing.sm }}>
-        <TextInput
-          style={[styles.input, { flex: 1 }]}
-          placeholder="Número"
-          placeholderTextColor={colors.textMuted}
-          value={number}
-          onChangeText={setNumber}
-        />
-        <TextInput
-          style={[styles.input, { flex: 2 }]}
-          placeholder="Bairro"
-          placeholderTextColor={colors.textMuted}
-          value={neighborhood}
-          onChangeText={setNeighborhood}
-        />
-      </View>
+      {loadingProfile ? (
+        <ActivityIndicator color={colors.accent} style={{ marginVertical: spacing.md }} />
+      ) : (
+        <AddressForm value={address} onChange={setAddress} />
+      )}
 
       <Text style={styles.sectionLabel}>Resumo</Text>
       <View style={styles.summary}>
@@ -197,16 +193,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   authWarningText: { color: colors.danger, ...type.small },
-  input: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderWidth: 1,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    color: colors.textPrimary,
-    marginBottom: spacing.sm,
-    ...type.body,
-  },
   summary: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,

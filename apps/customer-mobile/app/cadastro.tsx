@@ -4,9 +4,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import type { UserProfile } from "@delivery/shared-types";
+import type { UserAddress, UserProfile } from "@delivery/shared-types";
 import { auth, db } from "@/lib/firebase";
 import { colors, radius, spacing, type } from "@/lib/theme";
+import { AddressForm, EMPTY_ADDRESS } from "@/components/AddressForm";
 
 export default function CadastroScreen() {
   const insets = useSafeAreaInsets();
@@ -16,10 +17,14 @@ export default function CadastroScreen() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [address, setAddress] = useState<UserAddress>(EMPTY_ADDRESS);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const canSubmit = Boolean(name && email && phone && password && password === confirmPassword);
+  const addressComplete = Boolean(
+    address.cep && address.street && address.number && address.neighborhood && address.city && address.state
+  );
+  const canSubmit = Boolean(name && email && phone && password && password === confirmPassword && addressComplete);
 
   async function handleSubmit() {
     setError(null);
@@ -43,6 +48,7 @@ export default function CadastroScreen() {
         email,
         displayName: name,
         phone,
+        address,
         createdAt: now,
         updatedAt: now,
       };
@@ -117,6 +123,9 @@ export default function CadastroScreen() {
         onChangeText={setConfirmPassword}
       />
 
+      <Text style={styles.sectionTitle}>Endereço de entrega</Text>
+      <AddressForm value={address} onChange={setAddress} />
+
       {error && <Text style={styles.error}>{error}</Text>}
 
       <Pressable
@@ -140,6 +149,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   title: { color: colors.textPrimary, ...type.h1, marginBottom: spacing.xs },
   subtitle: { color: colors.textSecondary, ...type.body, marginBottom: spacing.xl },
+  sectionTitle: { color: colors.textPrimary, ...type.h2, marginTop: spacing.lg, marginBottom: spacing.md },
   label: {
     color: colors.textSecondary,
     ...type.caption,

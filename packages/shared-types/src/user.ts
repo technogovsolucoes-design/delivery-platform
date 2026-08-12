@@ -6,11 +6,22 @@ export interface AuthClaims {
   tenantId: string | null;
 }
 
+export interface UserAddress {
+  cep: string;
+  street: string;
+  number: string;
+  complement: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+}
+
 export interface UserProfile {
   id: string;
   email: string;
   displayName: string;
   phone: string | null;
+  address: UserAddress | null;
   createdAt: number;
   updatedAt: number;
 }

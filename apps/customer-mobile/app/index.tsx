@@ -60,6 +60,9 @@ export default function StoresScreen() {
             <Text style={styles.brandName}>Tião Beer Delivery</Text>
             <Text style={styles.brandTagline}>Suas bebidas, onde você estiver!</Text>
           </View>
+          <Pressable onPress={() => router.push("/perfil")} hitSlop={12} style={{ marginRight: spacing.md }}>
+            <Text style={styles.logout}>Perfil</Text>
+          </Pressable>
           <Pressable onPress={() => signOut(auth)} hitSlop={12}>
             <Text style={styles.logout}>Sair</Text>
           </Pressable>

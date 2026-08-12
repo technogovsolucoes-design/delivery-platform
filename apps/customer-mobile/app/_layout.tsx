@@ -22,6 +22,7 @@ export default function RootLayout() {
             <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="login" options={{ headerShown: false }} />
             <Stack.Screen name="cadastro" options={{ headerShown: false }} />
+            <Stack.Screen name="perfil" options={{ headerShown: false }} />
             <Stack.Screen name="loja/[tenantId]" options={{ title: "Catálogo" }} />
             <Stack.Screen name="carrinho" options={{ headerShown: false }} />
             <Stack.Screen name="checkout" options={{ headerShown: false }} />
