@@ -13,7 +13,10 @@ const CUSTOMER_WEB_URL = "https://delivery-customer-web-hazel.vercel.app";
 const WEBHOOK_URL = "https://mpwebhook-jzzt2h3tsq-uc.a.run.app";
 
 export const createPaymentPreference = onCall<CreatePaymentPreferenceRequest>(
-  { secrets: [mpAccessToken] },
+  // Callable functions still sit behind Cloud Run's own IAM gate in front of our code —
+  // "invoker: public" is what makes `firebase deploy` grant allUsers run.invoker so
+  // requests reach the function at all (our own auth check below still applies).
+  { secrets: [mpAccessToken], invoker: "public" },
   async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Login required.");

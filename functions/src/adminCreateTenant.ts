@@ -32,7 +32,7 @@ const DEFAULT_OPENING_HOURS: Tenant["openingHours"] = {
   sun: { open: "10:00", close: "20:00" },
 };
 
-export const adminCreateTenant = onCall<AdminCreateTenantRequest>(async (request) => {
+export const adminCreateTenant = onCall<AdminCreateTenantRequest>({ invoker: "public" }, async (request) => {
   if (request.auth?.token.role !== "platform_admin") {
     throw new HttpsError("permission-denied", "Only platform admins can create stores.");
   }

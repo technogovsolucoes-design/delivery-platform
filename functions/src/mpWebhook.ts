@@ -19,7 +19,7 @@ function mapMpStatus(mpStatus: string | undefined): PaymentStatus {
   }
 }
 
-export const mpWebhook = onRequest({ secrets: [mpAccessToken] }, async (req, res) => {
+export const mpWebhook = onRequest({ secrets: [mpAccessToken], invoker: "public" }, async (req, res) => {
   const type = (req.query.type as string | undefined) ?? req.body?.type;
   const paymentId = (req.query["data.id"] as string | undefined) ?? req.body?.data?.id;
 
