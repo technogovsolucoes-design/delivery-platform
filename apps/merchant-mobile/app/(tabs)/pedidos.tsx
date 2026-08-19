@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { collection, doc, onSnapshot, orderBy, query, updateDoc } from "firebase/firestore";
+import { signOut } from "firebase/auth";
 import type { Order } from "@delivery/shared-types";
-import { db } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import { formatCents } from "@/lib/format";
 import { ORDER_STATUS_LABEL, nextStatus } from "@/lib/order-status";
@@ -56,7 +57,12 @@ export default function PedidosScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + spacing.lg }]}>
-      <Text style={styles.title}>Pedidos</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>Pedidos</Text>
+        <Pressable onPress={() => signOut(auth)} hitSlop={12}>
+          <Text style={styles.logout}>Sair</Text>
+        </Pressable>
+      </View>
       {loading ? (
         <ActivityIndicator color={colors.accent} style={{ marginTop: 32 }} />
       ) : orders.length === 0 ? (
@@ -97,7 +103,15 @@ export default function PedidosScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  title: { color: colors.textPrimary, ...type.h1, paddingHorizontal: spacing.lg, marginBottom: spacing.lg },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+  },
+  title: { color: colors.textPrimary, ...type.h1 },
+  logout: { color: colors.textSecondary, ...type.small },
   empty: { color: colors.textSecondary, ...type.body, textAlign: "center" },
   emptyState: { alignItems: "center", paddingTop: 32, paddingHorizontal: spacing.xl },
   card: {

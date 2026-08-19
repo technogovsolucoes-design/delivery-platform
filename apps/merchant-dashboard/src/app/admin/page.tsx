@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { collection, getDocs, onSnapshot, query } from "firebase/firestore";
 import type { Tenant } from "@delivery/shared-types";
 import { db } from "@/lib/firebase";
@@ -89,6 +90,7 @@ export default function AdminLojasPage() {
                 <th>Status</th>
                 <th>Pedidos entregues</th>
                 <th>Receita</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -108,6 +110,11 @@ export default function AdminLojasPage() {
                     </td>
                     <td>{tenantSales ? tenantSales.orderCount : "…"}</td>
                     <td>{tenantSales ? formatCents(tenantSales.revenueCents) : "…"}</td>
+                    <td>
+                      <Link href={`/admin/lojas/${tenant.id}`} className="btn-sm btn-secondary" style={{ display: "inline-block" }}>
+                        Editar
+                      </Link>
+                    </td>
                   </tr>
                 );
               })}

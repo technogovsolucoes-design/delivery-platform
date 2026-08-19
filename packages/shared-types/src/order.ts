@@ -28,6 +28,10 @@ export interface Order {
   id: string;
   tenantId: string;
   customerId: string;
+  /** Denormalized from the customer's profile at order creation — tenant staff can't read
+   *  other users' profile docs, so the order itself is how a "Clientes" view gets a name/email. */
+  customerName: string;
+  customerEmail: string;
   items: OrderItem[];
   status: OrderStatus;
   subtotalCents: number;

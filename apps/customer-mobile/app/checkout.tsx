@@ -69,6 +69,8 @@ export default function CheckoutScreen() {
       const order: Omit<Order, "id"> = {
         tenantId: cart.tenantId,
         customerId: user.uid,
+        customerName: user.displayName ?? "",
+        customerEmail: user.email ?? "",
         items,
         status: "pending_payment",
         subtotalCents: cart.subtotalCents,

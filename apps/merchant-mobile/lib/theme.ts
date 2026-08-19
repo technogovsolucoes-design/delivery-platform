@@ -56,3 +56,20 @@ const STATUS_TINT: Record<string, { bg: string; fg: string }> = {
 export function statusTint(status: string): { bg: string; fg: string } {
   return STATUS_TINT[status] ?? { bg: colors.surfaceRaised, fg: colors.textSecondary };
 }
+
+interface CategoryStyle {
+  emoji: string;
+  tint: string;
+}
+
+const CATEGORY_STYLES: Record<string, CategoryStyle> = {
+  cerveja: { emoji: "🍺", tint: "#8A5A12" },
+  vinho: { emoji: "🍷", tint: "#6B1F3D" },
+  sem_alcool: { emoji: "💧", tint: "#1B5C91" },
+  destilado: { emoji: "🥃", tint: "#5B2C6F" },
+  geral: { emoji: "🛒", tint: "#3A3F47" },
+};
+
+export function categoryStyle(category: string): CategoryStyle {
+  return CATEGORY_STYLES[category] ?? CATEGORY_STYLES.geral!;
+}

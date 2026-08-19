@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 const NAV_ITEMS = [
   { href: "/admin", label: "Lojas", icon: "🏬" },
   { href: "/admin/nova", label: "Nova loja", icon: "➕" },
+  { href: "/admin/clientes", label: "Clientes", icon: "👤" },
 ];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
