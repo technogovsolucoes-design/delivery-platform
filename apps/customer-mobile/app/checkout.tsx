@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, Linking, ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 import { addDoc, collection, doc, getDoc } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
 import type { Order, OrderItem, Tenant, UserAddress, UserProfile } from "@delivery/shared-types";
@@ -9,7 +10,7 @@ import { db, functions } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import { useCart } from "@/lib/cart-context";
 import { formatCents } from "@/lib/format";
-import { colors, radius, spacing, type } from "@/lib/theme";
+import { colors, gradients, radius, spacing, type } from "@/lib/theme";
 import { AddressForm, EMPTY_ADDRESS } from "@/components/AddressForm";
 
 // Flat placeholder until real distance-based pricing is implemented.
@@ -127,11 +128,13 @@ export default function CheckoutScreen() {
         <Text style={styles.confirmTitle}>Pedido criado!</Text>
         <Text style={styles.confirmMeta}>Nº {paymentReady.orderId.slice(0, 8)}</Text>
         <Text style={styles.confirmNote}>Falta só pagar para a loja começar a preparar.</Text>
-        <Pressable style={styles.checkoutButton} onPress={() => Linking.openURL(paymentReady.initPoint)}>
-          <Text style={styles.checkoutButtonText}>Pagar com Mercado Pago</Text>
+        <Pressable style={{ width: "100%" }} onPress={() => Linking.openURL(paymentReady.initPoint)}>
+          <LinearGradient colors={gradients.gold} style={styles.checkoutButton}>
+            <Text style={styles.checkoutButtonText}>Pagar com Mercado Pago</Text>
+          </LinearGradient>
         </Pressable>
-        <Pressable style={[styles.checkoutButton, styles.secondaryButton]} onPress={() => router.replace("/pedidos")}>
-          <Text style={[styles.checkoutButtonText, styles.secondaryButtonText]}>Ver meus pedidos</Text>
+        <Pressable style={styles.secondaryButton} onPress={() => router.replace("/pedidos")}>
+          <Text style={styles.secondaryButtonText}>Ver meus pedidos</Text>
         </Pressable>
       </View>
     );
@@ -178,17 +181,19 @@ export default function CheckoutScreen() {
       {error && <Text style={styles.error}>{error}</Text>}
 
       <Pressable
-        style={[styles.checkoutButton, !canSubmit && styles.checkoutButtonDisabled]}
+        style={!canSubmit && styles.checkoutButtonDisabled}
         onPress={handleConfirm}
         disabled={!canSubmit}
       >
-        {submitting ? (
-          <ActivityIndicator color={colors.white} />
-        ) : (
-          <Text style={styles.checkoutButtonText}>
-            {!addressComplete ? "Preencha o endereço" : "Ir para pagamento"}
-          </Text>
-        )}
+        <LinearGradient colors={gradients.gold} style={styles.checkoutButton}>
+          {submitting ? (
+            <ActivityIndicator color="#17110A" />
+          ) : (
+            <Text style={styles.checkoutButtonText}>
+              {!addressComplete ? "Preencha o endereço" : "Ir para pagamento"}
+            </Text>
+          )}
+        </LinearGradient>
       </Pressable>
     </ScrollView>
   );
@@ -217,26 +222,32 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: spacing.md,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderSoft,
   },
   totalRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: spacing.sm },
-  totalRowFinal: { marginBottom: 0, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border },
+  totalRowFinal: { marginBottom: 0, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.borderSoft },
   totalLabel: { color: colors.textSecondary, ...type.small },
   totalValue: { color: colors.textPrimary, ...type.body },
   totalLabelFinal: { color: colors.textPrimary, ...type.bodyBold },
   totalValueFinal: { color: colors.accent, ...type.h2 },
   error: { color: colors.danger, ...type.small, marginTop: spacing.md },
   checkoutButton: {
-    backgroundColor: colors.accent,
     borderRadius: radius.md,
     padding: spacing.md,
     alignItems: "center",
     marginTop: spacing.xl,
   },
   checkoutButtonDisabled: { opacity: 0.4 },
-  checkoutButtonText: { color: colors.white, ...type.bodyBold },
-  secondaryButton: { backgroundColor: colors.surfaceRaised, marginTop: spacing.md },
-  secondaryButtonText: { color: colors.textPrimary },
+  checkoutButtonText: { color: "#17110A", ...type.bodyBold },
+  secondaryButton: {
+    backgroundColor: colors.surfaceRaised,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    alignItems: "center",
+    marginTop: spacing.md,
+    width: "100%",
+  },
+  secondaryButtonText: { color: colors.textPrimary, ...type.bodyBold },
   confirmContainer: { alignItems: "center", paddingHorizontal: spacing.xl },
   confirmTitle: { color: colors.textPrimary, ...type.h1, marginBottom: spacing.xs },
   confirmMeta: { color: colors.textSecondary, ...type.body, marginBottom: spacing.lg },

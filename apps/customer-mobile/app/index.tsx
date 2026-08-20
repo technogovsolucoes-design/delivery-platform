@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 import { signOut } from "firebase/auth";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import type { Tenant } from "@delivery/shared-types";
 import { auth, db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
-import { categoryStyle, colors, radius, spacing, type } from "@/lib/theme";
+import { categoryStyle, colors, gradients, radius, spacing, type } from "@/lib/theme";
 import logo from "../assets/images/logo.png";
 
 export default function StoresScreen() {
@@ -52,32 +53,37 @@ export default function StoresScreen() {
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + spacing.sm }]}>
-      <View style={styles.header}>
+    <View style={styles.container}>
+      <LinearGradient colors={gradients.hero} style={[styles.hero, { paddingTop: insets.top + spacing.md }]}>
         <View style={styles.brandRow}>
-          <Image source={logo} style={styles.logo} resizeMode="contain" />
+          <View style={styles.logoBadge}>
+            <Image source={logo} style={styles.logo} resizeMode="contain" />
+          </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.brandName}>Tião Beer Delivery</Text>
-            <Text style={styles.brandTagline}>Suas bebidas, onde você estiver!</Text>
+            <Text style={styles.brandTagline}>Suas bebidas, onde você estiver</Text>
           </View>
-          <Pressable onPress={() => router.push("/pedidos")} hitSlop={12} style={{ marginRight: spacing.md }}>
-            <Text style={styles.logout}>Pedidos</Text>
-          </Pressable>
-          <Pressable onPress={() => router.push("/perfil")} hitSlop={12} style={{ marginRight: spacing.md }}>
-            <Text style={styles.logout}>Perfil</Text>
-          </Pressable>
-          <Pressable onPress={() => signOut(auth)} hitSlop={12}>
-            <Text style={styles.logout}>Sair</Text>
-          </Pressable>
+          <View style={styles.actionsRow}>
+            <IconAction label="🧾" onPress={() => router.push("/pedidos")} />
+            <IconAction label="👤" onPress={() => router.push("/perfil")} />
+            <IconAction label="↩" onPress={() => signOut(auth)} />
+          </View>
+        </View>
+
+        <View style={styles.eyebrow}>
+          <Text style={styles.eyebrowText}>ENTREGA RÁPIDA</Text>
         </View>
         <Text style={styles.title}>O que vamos beber hoje?</Text>
-      </View>
+        <Text style={styles.subtitle}>Escolha uma loja perto de você e monte seu pedido</Text>
+      </LinearGradient>
 
       {loading ? (
         <ActivityIndicator color={colors.accent} style={{ marginTop: 48 }} />
       ) : stores.length === 0 ? (
         <View style={styles.emptyState}>
-          <Text style={{ fontSize: 40, marginBottom: spacing.md }}>🍹</Text>
+          <LinearGradient colors={gradients.gold} style={styles.emptyIcon}>
+            <Text style={{ fontSize: 30 }}>🍹</Text>
+          </LinearGradient>
           <Text style={styles.emptyTitle}>Nenhuma loja por aqui ainda</Text>
           <Text style={styles.emptyText}>Volte em breve — estamos cadastrando novas lojas.</Text>
         </View>
@@ -85,22 +91,24 @@ export default function StoresScreen() {
         <FlatList
           data={stores}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.xl }}
+          contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingTop: spacing.lg, paddingBottom: spacing.xl }}
           renderItem={({ item }) => {
-            const { emoji, tint } = categoryStyle("cerveja");
+            const { emoji } = categoryStyle("cerveja");
             return (
               <Pressable
                 style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
                 onPress={() => router.push(`/loja/${item.id}`)}
               >
-                <View style={[styles.storeIcon, { backgroundColor: tint }]}>
-                  <Text style={{ fontSize: 28 }}>{emoji}</Text>
-                </View>
+                <LinearGradient colors={gradients.gold} style={styles.storeIcon}>
+                  <Text style={{ fontSize: 26 }}>{emoji}</Text>
+                </LinearGradient>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.cardTitle}>{item.name}</Text>
                   <Text style={styles.cardMeta}>{item.address.neighborhood}</Text>
                 </View>
-                <Text style={styles.chevron}>›</Text>
+                <View style={styles.chevronBadge}>
+                  <Text style={styles.chevron}>›</Text>
+                </View>
               </Pressable>
             );
           }}
@@ -110,17 +118,67 @@ export default function StoresScreen() {
   );
 }
 
+function IconAction({ label, onPress }: { label: string; onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} hitSlop={10} style={({ pressed }) => [styles.iconAction, pressed && { opacity: 0.6 }]}>
+      <Text style={styles.iconActionText}>{label}</Text>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   centered: { alignItems: "center", justifyContent: "center" },
-  header: { paddingHorizontal: spacing.lg, marginBottom: spacing.lg },
-  brandRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm, marginBottom: spacing.lg },
-  logo: { width: 40, height: 40, borderRadius: radius.sm },
+  hero: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xl,
+    borderBottomLeftRadius: radius.lg,
+    borderBottomRightRadius: radius.lg,
+  },
+  brandRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm, marginBottom: spacing.xl },
+  logoBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.md,
+    backgroundColor: colors.surface,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+  },
+  logo: { width: 30, height: 30, borderRadius: radius.sm },
   brandName: { color: colors.textPrimary, ...type.bodyBold, fontSize: 16 },
-  brandTagline: { color: colors.textSecondary, ...type.caption, fontWeight: "500" },
-  logout: { color: colors.textSecondary, ...type.small },
-  title: { color: colors.textPrimary, ...type.h1 },
+  brandTagline: { color: colors.textSecondary, ...type.small },
+  actionsRow: { flexDirection: "row", gap: spacing.xs },
+  iconAction: {
+    width: 34,
+    height: 34,
+    borderRadius: radius.pill,
+    backgroundColor: "rgba(255,255,255,0.06)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconActionText: { fontSize: 14 },
+  eyebrow: {
+    alignSelf: "flex-start",
+    backgroundColor: colors.accentMuted,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 5,
+    borderRadius: radius.pill,
+    marginBottom: spacing.sm,
+  },
+  eyebrowText: { color: colors.goldLight, ...type.caption, letterSpacing: 0.6 },
+  title: { color: colors.textPrimary, ...type.h1, marginBottom: spacing.xs },
+  subtitle: { color: colors.textSecondary, ...type.body },
   emptyState: { alignItems: "center", justifyContent: "center", paddingTop: 64, paddingHorizontal: spacing.xl },
+  emptyIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: radius.lg,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: spacing.md,
+  },
   emptyTitle: { color: colors.textPrimary, ...type.h2, marginBottom: spacing.xs },
   emptyText: { color: colors.textSecondary, ...type.body, textAlign: "center" },
   card: {
@@ -132,11 +190,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.md,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderSoft,
   },
   cardPressed: { opacity: 0.7 },
   storeIcon: { width: 56, height: 56, borderRadius: radius.md, alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.textPrimary, ...type.bodyBold, marginBottom: 2 },
   cardMeta: { color: colors.textSecondary, ...type.small },
-  chevron: { color: colors.textMuted, fontSize: 24, fontWeight: "300" },
+  chevronBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: radius.pill,
+    backgroundColor: colors.surfaceRaised,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  chevron: { color: colors.textMuted, fontSize: 18, fontWeight: "300" },
 });

@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 import { collectionGroup, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import type { Order } from "@delivery/shared-types";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import { formatCents } from "@/lib/format";
 import { ORDER_STATUS_LABEL, statusTint } from "@/lib/order-status";
-import { colors, radius, spacing, type } from "@/lib/theme";
+import { colors, gradients, radius, spacing, type } from "@/lib/theme";
 
 export default function MeusPedidosScreen() {
   const insets = useSafeAreaInsets();
@@ -53,7 +54,9 @@ export default function MeusPedidosScreen() {
         <ActivityIndicator color={colors.accent} style={{ marginTop: 32 }} />
       ) : orders.length === 0 ? (
         <View style={styles.emptyState}>
-          <Text style={{ fontSize: 40, marginBottom: spacing.md }}>🧾</Text>
+          <LinearGradient colors={gradients.gold} style={styles.emptyIcon}>
+            <Text style={{ fontSize: 28 }}>🧾</Text>
+          </LinearGradient>
           <Text style={styles.emptyTitle}>Nenhum pedido ainda</Text>
           <Text style={styles.emptyText}>Seus pedidos vão aparecer aqui.</Text>
         </View>
@@ -91,6 +94,14 @@ const styles = StyleSheet.create({
   back: { color: colors.textSecondary, ...type.body },
   title: { color: colors.textPrimary, ...type.h1, paddingHorizontal: spacing.lg, marginBottom: spacing.lg },
   emptyState: { alignItems: "center", paddingTop: 48, paddingHorizontal: spacing.xl },
+  emptyIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: radius.lg,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: spacing.md,
+  },
   emptyTitle: { color: colors.textPrimary, ...type.h2, marginBottom: spacing.xs },
   emptyText: { color: colors.textSecondary, ...type.body, textAlign: "center" },
   card: {
@@ -99,7 +110,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderSoft,
   },
   cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: spacing.xs },
   cardTitle: { color: colors.textPrimary, ...type.bodyBold },

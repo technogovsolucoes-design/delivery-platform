@@ -9,12 +9,13 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 import { addDoc, collection, deleteDoc, doc, onSnapshot, orderBy, query, updateDoc } from "firebase/firestore";
 import type { Product } from "@delivery/shared-types";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import { formatCents } from "@/lib/format";
-import { categoryStyle, colors, radius, spacing, type } from "@/lib/theme";
+import { categoryStyle, colors, gradients, radius, spacing, type } from "@/lib/theme";
 
 export default function EstoqueScreen() {
   const { claims } = useAuth();
@@ -137,11 +138,13 @@ export default function EstoqueScreen() {
           />
         </View>
         <Pressable
-          style={[styles.addButton, (!name || !priceReais || !stockQuantity) && styles.addButtonDisabled]}
+          style={(!name || !priceReais || !stockQuantity) && styles.addButtonDisabled}
           onPress={handleAddProduct}
           disabled={submitting || !name || !priceReais || !stockQuantity}
         >
-          {submitting ? <ActivityIndicator color={colors.white} /> : <Text style={styles.addButtonText}>Adicionar produto</Text>}
+          <LinearGradient colors={gradients.gold} style={styles.addButton}>
+            {submitting ? <ActivityIndicator color="#17110A" /> : <Text style={styles.addButtonText}>Adicionar produto</Text>}
+          </LinearGradient>
         </Pressable>
       </View>
 
@@ -219,16 +222,16 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
     ...type.body,
   },
-  addButton: { backgroundColor: colors.accent, borderRadius: radius.md, padding: spacing.md, alignItems: "center" },
+  addButton: { borderRadius: radius.md, padding: spacing.md, alignItems: "center" },
   addButtonDisabled: { opacity: 0.4 },
-  addButtonText: { color: colors.white, ...type.bodyBold },
+  addButtonText: { color: "#17110A", ...type.bodyBold },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
     padding: spacing.md,
     marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderSoft,
   },
   cardTop: { flexDirection: "row", alignItems: "center", gap: spacing.sm, marginBottom: spacing.md },
   categoryTag: { width: 40, height: 40, borderRadius: radius.sm, alignItems: "center", justifyContent: "center" },

@@ -105,6 +105,9 @@ export default function EstoquePage() {
     );
   }
 
+  const activeCount = products.filter((p) => p.active).length;
+  const lowStockCount = products.filter((p) => p.stockQuantity <= p.lowStockThreshold).length;
+
   return (
     <div>
       <div className="page-header">
@@ -112,6 +115,26 @@ export default function EstoquePage() {
         <h1>Estoque</h1>
         <p>Adicione produtos e mantenha a quantidade em estoque atualizada.</p>
       </div>
+
+      {products.length > 0 && (
+        <div className="stat-grid">
+          <div className="stat-card">
+            <div className="stat-icon">📦</div>
+            <div className="stat-value">{products.length}</div>
+            <div className="stat-label">Produtos cadastrados</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon">✅</div>
+            <div className="stat-value">{activeCount}</div>
+            <div className="stat-label">Ativos no catálogo</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon">⚠️</div>
+            <div className="stat-value">{lowStockCount}</div>
+            <div className="stat-label">Estoque baixo</div>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleAddProduct} className="card" style={{ maxWidth: 460, marginBottom: 32 }}>
         <h2 style={{ marginBottom: 16 }}>Novo produto</h2>

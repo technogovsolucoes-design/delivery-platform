@@ -65,6 +65,10 @@ export default function AdminLojasPage() {
     };
   }, [tenants]);
 
+  const activeCount = tenants.filter((t) => t.status === "active").length;
+  const pendingCount = tenants.filter((t) => t.status === "pending").length;
+  const totalRevenueCents = Object.values(sales).reduce((sum, s) => sum + s.revenueCents, 0);
+
   return (
     <div>
       <div className="page-header">
@@ -72,6 +76,31 @@ export default function AdminLojasPage() {
         <h1>Lojas</h1>
         <p>Todas as lojas cadastradas na plataforma, com vendas entregues.</p>
       </div>
+
+      {tenants.length > 0 && (
+        <div className="stat-grid">
+          <div className="stat-card">
+            <div className="stat-icon">🏬</div>
+            <div className="stat-value">{tenants.length}</div>
+            <div className="stat-label">Lojas cadastradas</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon">✅</div>
+            <div className="stat-value">{activeCount}</div>
+            <div className="stat-label">Ativas</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon">⏳</div>
+            <div className="stat-value">{pendingCount}</div>
+            <div className="stat-label">Pendentes</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon">💰</div>
+            <div className="stat-value">{formatCents(totalRevenueCents)}</div>
+            <div className="stat-label">Receita da plataforma</div>
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <p>Carregando...</p>

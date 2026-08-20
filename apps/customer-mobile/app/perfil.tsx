@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 import { updateProfile } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import type { UserAddress, UserProfile } from "@delivery/shared-types";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
-import { colors, radius, spacing, type } from "@/lib/theme";
+import { colors, gradients, radius, spacing, type } from "@/lib/theme";
 import { AddressForm, EMPTY_ADDRESS } from "@/components/AddressForm";
 
 export default function PerfilScreen() {
@@ -98,8 +99,10 @@ export default function PerfilScreen() {
       {error && <Text style={styles.error}>{error}</Text>}
       {saved && <Text style={styles.success}>Perfil atualizado!</Text>}
 
-      <Pressable style={styles.button} onPress={handleSave} disabled={saving}>
-        {saving ? <ActivityIndicator color={colors.white} /> : <Text style={styles.buttonText}>Salvar alterações</Text>}
+      <Pressable onPress={handleSave} disabled={saving}>
+        <LinearGradient colors={gradients.gold} style={styles.button}>
+          {saving ? <ActivityIndicator color="#17110A" /> : <Text style={styles.buttonText}>Salvar alterações</Text>}
+        </LinearGradient>
       </Pressable>
     </ScrollView>
   );
@@ -130,6 +133,6 @@ const styles = StyleSheet.create({
   },
   error: { color: colors.danger, ...type.small, marginBottom: spacing.md },
   success: { color: colors.success, ...type.small, marginBottom: spacing.md },
-  button: { backgroundColor: colors.accent, borderRadius: radius.md, padding: spacing.md, alignItems: "center", marginTop: spacing.sm },
-  buttonText: { color: colors.white, ...type.bodyBold },
+  button: { borderRadius: radius.md, padding: spacing.md, alignItems: "center", marginTop: spacing.sm },
+  buttonText: { color: "#17110A", ...type.bodyBold },
 });

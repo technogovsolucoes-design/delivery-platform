@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 import { collection, doc, onSnapshot, orderBy, query, updateDoc } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import type { Order } from "@delivery/shared-types";
@@ -8,7 +9,7 @@ import { auth, db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import { formatCents } from "@/lib/format";
 import { ORDER_STATUS_LABEL, nextStatus } from "@/lib/order-status";
-import { colors, radius, spacing, statusTint, type } from "@/lib/theme";
+import { colors, gradients, radius, spacing, statusTint, type } from "@/lib/theme";
 
 export default function PedidosScreen() {
   const { claims } = useAuth();
@@ -88,8 +89,10 @@ export default function PedidosScreen() {
                 </View>
                 <Text style={styles.cardPrice}>{formatCents(item.totalCents)}</Text>
                 {next && (
-                  <Pressable style={styles.advanceButton} onPress={() => advanceStatus(item.id, next)}>
-                    <Text style={styles.advanceButtonText}>Avançar para &quot;{ORDER_STATUS_LABEL[next]}&quot;</Text>
+                  <Pressable onPress={() => advanceStatus(item.id, next)}>
+                    <LinearGradient colors={gradients.gold} style={styles.advanceButton}>
+                      <Text style={styles.advanceButtonText}>Avançar para &quot;{ORDER_STATUS_LABEL[next]}&quot;</Text>
+                    </LinearGradient>
                   </Pressable>
                 )}
               </View>
@@ -120,13 +123,13 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderSoft,
   },
   cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: spacing.sm },
   cardTitle: { color: colors.textPrimary, ...type.bodyBold },
   cardPrice: { color: colors.textPrimary, ...type.h2, marginBottom: spacing.md },
   badge: { paddingHorizontal: spacing.sm, paddingVertical: 4, borderRadius: radius.pill },
   badgeText: { ...type.caption },
-  advanceButton: { backgroundColor: colors.accent, borderRadius: radius.md, padding: spacing.sm, alignItems: "center" },
-  advanceButtonText: { color: colors.white, ...type.caption },
+  advanceButton: { borderRadius: radius.md, padding: spacing.sm, alignItems: "center" },
+  advanceButtonText: { color: "#17110A", ...type.caption },
 });

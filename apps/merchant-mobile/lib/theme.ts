@@ -1,15 +1,20 @@
 export const colors = {
-  bg: "#0B0D10",
+  bg: "#08090C",
+  bgElevated: "#0D0F13",
   surface: "#15181D",
   surfaceRaised: "#1D2128",
   border: "#272C34",
-  textPrimary: "#F3F4F6",
-  textSecondary: "#9AA3AE",
-  textMuted: "#6B7280",
-  accent: "#FF6B35",
-  accentMuted: "#4A2A1A",
-  success: "#33D17A",
-  successMuted: "#143324",
+  borderSoft: "#1C1E24",
+  textPrimary: "#F7F5F0",
+  textSecondary: "#A3A09A",
+  textMuted: "#6B6963",
+  // Gold trio, lifted straight from the mascot logo.
+  goldLight: "#FFD166",
+  accent: "#F0A202",
+  goldDeep: "#C97B00",
+  accentMuted: "#3D2E0A",
+  success: "#2FD47A",
+  successMuted: "#123424",
   warning: "#F5A623",
   warningMuted: "#3A2C0E",
   danger: "#FF5C5C",
@@ -17,6 +22,12 @@ export const colors = {
   info: "#4F8CFF",
   infoMuted: "#182842",
   white: "#FFFFFF",
+};
+
+export const gradients = {
+  gold: [colors.goldLight, colors.accent, colors.goldDeep] as const,
+  goldSoft: ["rgba(255,209,102,0.18)", "rgba(240,162,2,0.05)"] as const,
+  hero: ["#1A1508", "#08090C"] as const,
 };
 
 export const spacing = {
@@ -35,13 +46,21 @@ export const radius = {
   pill: 999,
 };
 
+export const fonts = {
+  regular: "PlusJakartaSans_400Regular",
+  medium: "PlusJakartaSans_500Medium",
+  semiBold: "PlusJakartaSans_600SemiBold",
+  bold: "PlusJakartaSans_700Bold",
+  extraBold: "PlusJakartaSans_800ExtraBold",
+};
+
 export const type = {
-  h1: { fontSize: 26, fontWeight: "800" as const, letterSpacing: -0.5 },
-  h2: { fontSize: 20, fontWeight: "700" as const, letterSpacing: -0.3 },
-  body: { fontSize: 15, fontWeight: "500" as const },
-  bodyBold: { fontSize: 15, fontWeight: "700" as const },
-  small: { fontSize: 13, fontWeight: "500" as const },
-  caption: { fontSize: 12, fontWeight: "600" as const },
+  h1: { fontSize: 28, fontFamily: fonts.extraBold, letterSpacing: -0.6 },
+  h2: { fontSize: 19, fontFamily: fonts.bold, letterSpacing: -0.3 },
+  body: { fontSize: 15, fontFamily: fonts.medium },
+  bodyBold: { fontSize: 15, fontFamily: fonts.bold },
+  small: { fontSize: 13, fontFamily: fonts.medium },
+  caption: { fontSize: 12, fontFamily: fonts.semiBold },
 };
 
 const STATUS_TINT: Record<string, { bg: string; fg: string }> = {

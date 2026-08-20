@@ -55,6 +55,10 @@ export default function PedidosPage() {
     );
   }
 
+  const pendingCount = orders.filter((o) => o.status === "pending_payment" || o.status === "confirmed").length;
+  const inProgressCount = orders.filter((o) => o.status === "preparing" || o.status === "out_for_delivery").length;
+  const revenueCents = orders.filter((o) => o.status === "delivered").reduce((sum, o) => sum + o.totalCents, 0);
+
   return (
     <div>
       <div className="page-header">
@@ -62,6 +66,31 @@ export default function PedidosPage() {
         <h1>Pedidos</h1>
         <p>Fila de pedidos em tempo real.</p>
       </div>
+
+      {orders.length > 0 && (
+        <div className="stat-grid">
+          <div className="stat-card">
+            <div className="stat-icon">🧾</div>
+            <div className="stat-value">{orders.length}</div>
+            <div className="stat-label">Total de pedidos</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon">⏳</div>
+            <div className="stat-value">{pendingCount}</div>
+            <div className="stat-label">Aguardando</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon">🚚</div>
+            <div className="stat-value">{inProgressCount}</div>
+            <div className="stat-label">Em andamento</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon">💰</div>
+            <div className="stat-value">{formatCents(revenueCents)}</div>
+            <div className="stat-label">Faturado (entregues)</div>
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <p>Carregando...</p>

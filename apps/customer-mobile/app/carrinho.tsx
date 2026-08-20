@@ -1,9 +1,10 @@
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 import { useCart } from "@/lib/cart-context";
 import { formatCents } from "@/lib/format";
-import { colors, radius, spacing, type } from "@/lib/theme";
+import { colors, gradients, radius, spacing, type } from "@/lib/theme";
 
 export default function CartScreen() {
   const cart = useCart();
@@ -57,8 +58,10 @@ export default function CartScreen() {
           <Text style={styles.totalLabel}>Subtotal</Text>
           <Text style={styles.totalValue}>{formatCents(cart.subtotalCents)}</Text>
         </View>
-        <Pressable style={styles.checkoutButton} onPress={() => router.push("/checkout")}>
-          <Text style={styles.checkoutButtonText}>Ir para o checkout</Text>
+        <Pressable onPress={() => router.push("/checkout")}>
+          <LinearGradient colors={gradients.gold} style={styles.checkoutButton}>
+            <Text style={styles.checkoutButtonText}>Ir para o checkout</Text>
+          </LinearGradient>
         </Pressable>
       </View>
     </View>
@@ -79,7 +82,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderSoft,
   },
   itemName: { color: colors.textPrimary, ...type.bodyBold },
   itemMeta: { color: colors.textSecondary, ...type.small, marginTop: 2 },
@@ -96,13 +99,13 @@ const styles = StyleSheet.create({
   qtyValue: { color: colors.textPrimary, ...type.bodyBold, minWidth: 18, textAlign: "center" },
   footer: {
     borderTopWidth: 1,
-    borderTopColor: colors.border,
+    borderTopColor: colors.borderSoft,
     paddingTop: spacing.lg,
     paddingHorizontal: spacing.lg,
   },
   totalRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: spacing.md },
   totalLabel: { color: colors.textSecondary, ...type.body },
   totalValue: { color: colors.textPrimary, ...type.h2 },
-  checkoutButton: { backgroundColor: colors.accent, borderRadius: radius.md, padding: spacing.md, alignItems: "center" },
-  checkoutButtonText: { color: colors.white, ...type.bodyBold },
+  checkoutButton: { borderRadius: radius.md, padding: spacing.md, alignItems: "center" },
+  checkoutButtonText: { color: "#17110A", ...type.bodyBold },
 });

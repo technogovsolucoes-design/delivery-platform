@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import type { UserAddress, UserProfile } from "@delivery/shared-types";
 import { auth, db } from "@/lib/firebase";
-import { colors, radius, spacing, type } from "@/lib/theme";
+import { colors, gradients, radius, spacing, type } from "@/lib/theme";
 import { AddressForm, EMPTY_ADDRESS } from "@/components/AddressForm";
 
 export default function CadastroScreen() {
@@ -72,11 +73,14 @@ export default function CadastroScreen() {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={{ padding: spacing.xl, paddingTop: insets.top + spacing.xl, paddingBottom: spacing.xxl }}
+      contentContainerStyle={{ paddingBottom: spacing.xxl }}
     >
-      <Text style={styles.title}>Criar conta</Text>
-      <Text style={styles.subtitle}>Leva menos de um minuto</Text>
+      <LinearGradient colors={gradients.hero} style={{ paddingHorizontal: spacing.xl, paddingTop: insets.top + spacing.xl, paddingBottom: spacing.xl }}>
+        <Text style={styles.title}>Criar conta</Text>
+        <Text style={styles.subtitle}>Leva menos de um minuto</Text>
+      </LinearGradient>
 
+      <View style={{ padding: spacing.xl, paddingTop: spacing.lg }}>
       <Text style={styles.label}>Nome completo</Text>
       <TextInput
         style={styles.input}
@@ -128,12 +132,10 @@ export default function CadastroScreen() {
 
       {error && <Text style={styles.error}>{error}</Text>}
 
-      <Pressable
-        style={[styles.button, !canSubmit && styles.buttonDisabled]}
-        onPress={handleSubmit}
-        disabled={!canSubmit || submitting}
-      >
-        {submitting ? <ActivityIndicator color={colors.white} /> : <Text style={styles.buttonText}>Criar conta</Text>}
+      <Pressable onPress={handleSubmit} disabled={!canSubmit || submitting} style={!canSubmit && styles.buttonDisabled}>
+        <LinearGradient colors={gradients.gold} style={styles.button}>
+          {submitting ? <ActivityIndicator color="#17110A" /> : <Text style={styles.buttonText}>Criar conta</Text>}
+        </LinearGradient>
       </Pressable>
 
       <Pressable style={styles.linkRow} onPress={() => router.back()}>
@@ -141,6 +143,7 @@ export default function CadastroScreen() {
           Já tem conta? <Text style={styles.linkTextBold}>Entrar</Text>
         </Text>
       </Pressable>
+      </View>
     </ScrollView>
   );
 }
@@ -169,15 +172,14 @@ const styles = StyleSheet.create({
   },
   error: { color: colors.danger, ...type.small, marginBottom: spacing.md },
   button: {
-    backgroundColor: colors.accent,
     borderRadius: radius.md,
     padding: spacing.md,
     alignItems: "center",
     marginTop: spacing.sm,
   },
   buttonDisabled: { opacity: 0.4 },
-  buttonText: { color: colors.white, ...type.bodyBold },
+  buttonText: { color: "#17110A", ...type.bodyBold },
   linkRow: { marginTop: spacing.lg, alignItems: "center" },
   linkText: { color: colors.textSecondary, ...type.small },
-  linkTextBold: { color: colors.accent, fontWeight: "700" },
+  linkTextBold: { color: colors.goldLight, fontFamily: type.bodyBold.fontFamily },
 });

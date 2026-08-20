@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import type { Product } from "@delivery/shared-types";
 import { db } from "@/lib/firebase";
 import { useCart } from "@/lib/cart-context";
 import { formatCents } from "@/lib/format";
 import { ProductImage } from "@/components/ProductImage";
-import { colors, radius, spacing, type } from "@/lib/theme";
+import { colors, gradients, radius, spacing, type } from "@/lib/theme";
 
 export default function StoreScreen() {
   const { tenantId } = useLocalSearchParams<{ tenantId: string }>();
@@ -115,14 +116,16 @@ export default function StoreScreen() {
 
       {cartQuantity > 0 && (
         <Pressable
-          style={[styles.cartBar, { bottom: insets.bottom + spacing.md }]}
+          style={[styles.cartBarWrap, { bottom: insets.bottom + spacing.md }]}
           onPress={() => router.push("/carrinho")}
         >
-          <View style={styles.cartBadge}>
-            <Text style={styles.cartBadgeText}>{cartQuantity}</Text>
-          </View>
-          <Text style={styles.cartBarText}>Ver carrinho</Text>
-          <Text style={styles.cartBarPrice}>{formatCents(cart.subtotalCents)}</Text>
+          <LinearGradient colors={gradients.gold} style={styles.cartBar}>
+            <View style={styles.cartBadge}>
+              <Text style={styles.cartBadgeText}>{cartQuantity}</Text>
+            </View>
+            <Text style={styles.cartBarText}>Ver carrinho</Text>
+            <Text style={styles.cartBarPrice}>{formatCents(cart.subtotalCents)}</Text>
+          </LinearGradient>
         </Pressable>
       )}
     </View>
@@ -143,17 +146,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.md,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderSoft,
   },
   cardTitle: { color: colors.textPrimary, ...type.bodyBold, marginBottom: 4 },
-  cardPrice: { color: colors.accent, ...type.body, fontWeight: "700" },
+  cardPrice: { color: colors.accent, ...type.body, fontFamily: type.bodyBold.fontFamily },
   addButton: {
     backgroundColor: colors.accentMuted,
     borderRadius: radius.pill,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
   },
-  addButtonText: { color: colors.accent, ...type.caption },
+  addButtonText: { color: colors.goldLight, ...type.caption },
   stepper: {
     flexDirection: "row",
     alignItems: "center",
@@ -172,24 +175,25 @@ const styles = StyleSheet.create({
   },
   stepperButtonText: { color: colors.white, fontSize: 18, fontWeight: "700", marginTop: -2 },
   stepperValue: { color: colors.textPrimary, ...type.bodyBold, minWidth: 16, textAlign: "center" },
-  cartBar: {
+  cartBarWrap: {
     position: "absolute",
     left: spacing.lg,
     right: spacing.lg,
-    backgroundColor: colors.accent,
+    shadowColor: colors.accent,
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 6,
+  },
+  cartBar: {
     borderRadius: radius.lg,
     padding: spacing.md,
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,
-    shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 6,
   },
   cartBadge: {
-    backgroundColor: "rgba(255,255,255,0.25)",
+    backgroundColor: "rgba(23,17,10,0.2)",
     borderRadius: radius.pill,
     minWidth: 24,
     height: 24,
@@ -197,7 +201,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 6,
   },
-  cartBadgeText: { color: colors.white, ...type.caption },
-  cartBarText: { color: colors.white, ...type.bodyBold, flex: 1 },
-  cartBarPrice: { color: colors.white, ...type.bodyBold },
+  cartBadgeText: { color: "#17110A", ...type.caption },
+  cartBarText: { color: "#17110A", ...type.bodyBold, flex: 1 },
+  cartBarPrice: { color: "#17110A", ...type.bodyBold },
 });
