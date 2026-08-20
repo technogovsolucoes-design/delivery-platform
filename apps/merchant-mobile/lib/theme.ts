@@ -1,3 +1,5 @@
+import { Platform } from "react-native";
+
 export const colors = {
   bg: "#08090C",
   bgElevated: "#0D0F13",
@@ -54,13 +56,24 @@ export const fonts = {
   extraBold: "PlusJakartaSans_800ExtraBold",
 };
 
+// Native loads named font assets via useFonts; web gets the family from the
+// Google Fonts <link> in app/+html.tsx and needs a plain family + numeric
+// weight instead of per-weight synthetic names.
+type FontWeight = "400" | "500" | "600" | "700" | "800";
+
+function textStyle(weight: keyof typeof fonts, fontWeight: FontWeight, fontSize: number, letterSpacing?: number) {
+  return Platform.OS === "web"
+    ? { fontFamily: '"Plus Jakarta Sans", -apple-system, "Segoe UI", sans-serif', fontWeight, fontSize, letterSpacing }
+    : { fontFamily: fonts[weight], fontSize, letterSpacing };
+}
+
 export const type = {
-  h1: { fontSize: 28, fontFamily: fonts.extraBold, letterSpacing: -0.6 },
-  h2: { fontSize: 19, fontFamily: fonts.bold, letterSpacing: -0.3 },
-  body: { fontSize: 15, fontFamily: fonts.medium },
-  bodyBold: { fontSize: 15, fontFamily: fonts.bold },
-  small: { fontSize: 13, fontFamily: fonts.medium },
-  caption: { fontSize: 12, fontFamily: fonts.semiBold },
+  h1: textStyle("extraBold", "800", 28, -0.6),
+  h2: textStyle("bold", "700", 19, -0.3),
+  body: textStyle("medium", "500", 15),
+  bodyBold: textStyle("bold", "700", 15),
+  small: textStyle("medium", "500", 13),
+  caption: textStyle("semiBold", "600", 12),
 };
 
 const STATUS_TINT: Record<string, { bg: string; fg: string }> = {

@@ -1,4 +1,3 @@
-import { View } from "react-native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -15,17 +14,16 @@ import { CartProvider } from "@/lib/cart-context";
 import { colors } from "@/lib/theme";
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
+  // Loaded eagerly for native. On web the same family comes from the Google
+  // Fonts <link> injected in app/+html.tsx, so we never block first paint on
+  // this promise — a stalled/failed fetch here must not blank the screen.
+  useFonts({
     PlusJakartaSans_400Regular,
     PlusJakartaSans_500Medium,
     PlusJakartaSans_600SemiBold,
     PlusJakartaSans_700Bold,
     PlusJakartaSans_800ExtraBold,
   });
-
-  if (!fontsLoaded) {
-    return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
-  }
 
   return (
     <SafeAreaProvider>

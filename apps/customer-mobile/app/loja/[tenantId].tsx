@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     borderColor: colors.borderSoft,
   },
   cardTitle: { color: colors.textPrimary, ...type.bodyBold, marginBottom: 4 },
-  cardPrice: { color: colors.accent, ...type.body, fontFamily: type.bodyBold.fontFamily },
+  cardPrice: { color: colors.accent, ...type.body, fontFamily: type.bodyBold.fontFamily, fontWeight: type.bodyBold.fontWeight },
   addButton: {
     backgroundColor: colors.accentMuted,
     borderRadius: radius.pill,

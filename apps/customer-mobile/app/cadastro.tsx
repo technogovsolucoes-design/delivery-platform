@@ -181,5 +181,5 @@ const styles = StyleSheet.create({
   buttonText: { color: "#17110A", ...type.bodyBold },
   linkRow: { marginTop: spacing.lg, alignItems: "center" },
   linkText: { color: colors.textSecondary, ...type.small },
-  linkTextBold: { color: colors.goldLight, fontFamily: type.bodyBold.fontFamily },
+  linkTextBold: { color: colors.goldLight, fontFamily: type.bodyBold.fontFamily, fontWeight: type.bodyBold.fontWeight },
 });
